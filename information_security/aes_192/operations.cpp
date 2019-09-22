@@ -5,9 +5,9 @@ namespace  Operations{
 
     void print(byte* word, int count , int mod  , int val){
         for(int i=0;i<count;++i){
-            cout << std::hex << (int)word[i] << ((i%mod == val)? "\n":" ");
+            out(std::hex);out((int)word[i]);out(((i%mod == val)? "\n":" "));
         }
-        cout <<"\n";
+        out("\n");
     }
 
     static byte sub_bytes_table [] = {
@@ -52,11 +52,19 @@ namespace  Operations{
     void PrintState(AES_CODE* input){
         for(int i=0;i<ARR_SIZE;++i){
             for(int j=0;j<ARR_SIZE;++j){
-                cout << std::hex << (int)*input[i][j] << " ";
+                out((int)*input[j][i]);out(' ');
             }
-            cout<<"\n";
+            out("\n");
         }
-        cout << std::endl;
+        out("\n");
+        /*
+        for(int i=0;i<ARR_SIZE;++i){
+            for(int j=0;j<ARR_SIZE;++j){
+                out(std::hex);out((int)*input[i][j]);out(" ");
+            }
+            out("\n");
+        }
+        out(std::endl);*/
     }
 
 
@@ -101,23 +109,6 @@ namespace  Operations{
     }
 
     void MixColumns(AES_CODE* input){
-        /*
-        AES_CODE res;
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                res[i][j] = 0;
-                for(int g=0;g<ARR_SIZE;++g){
-
-                    cout << (int)mix_column_table[j][g] <<" " << (int)*input[g][j] <<"\n";
-                    res[i][j] += mix_column_table[j][g] * *input[g][j];
-                }
-            }
-        }
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                *input[i][j] = res[i][j];
-            }
-        }*/
         for(int i=0;i<ARR_SIZE;++i){
             byte tmp[] = {*input[0][i],*input[1][i],*input[2][i],*input[3][i]};
             MixColumn(tmp);
@@ -125,6 +116,62 @@ namespace  Operations{
                 *input[j][i] = tmp[j];
         }
     }
+
+
+
+    void InvSubBytes(AES_CODE* input){
+        for(int i=0;i<ARR_SIZE;++i){
+            for(int j=0;j<ARR_SIZE;++j){
+                *input[i][j] = reverse_sub_bytes_table[*input[i][j]];
+            }
+        }
+    }
+
+    void InvShiftRows(AES_CODE* input){
+        int shift;
+        AES_CODE res;
+        for(int i=0;i<ARR_SIZE;++i){
+            shift = i;
+            for(int j=0;j<ARR_SIZE;++j){
+                res[i][(j+shift)%ARR_SIZE] = *input[i][j];
+            }
+            for(int j=0;j<ARR_SIZE;++j){
+                *input[i][j] = res[i][j];
+            }
+        }
+    }
+
+    byte xtime(byte x)
+    {
+      return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
+    }
+
+    byte Multiply(byte x, byte y)
+    {
+      return (((y & 1) * x) ^
+           ((y>>1 & 1) * xtime(x)) ^
+           ((y>>2 & 1) * xtime(xtime(x))) ^
+           ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
+           ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
+      }
+
+    void InvMixColumn(byte* column){
+          byte a = column[0],b = column[1],c = column[2],d = column[3];
+          column[0] = Multiply(a, 0x0e) ^ Multiply(b, 0x0b) ^ Multiply(c, 0x0d) ^ Multiply(d, 0x09);
+          column[1] = Multiply(a, 0x09) ^ Multiply(b, 0x0e) ^ Multiply(c, 0x0b) ^ Multiply(d, 0x0d);
+          column[2] = Multiply(a, 0x0d) ^ Multiply(b, 0x09) ^ Multiply(c, 0x0e) ^ Multiply(d, 0x0b);
+          column[3] = Multiply(a, 0x0b) ^ Multiply(b, 0x0d) ^ Multiply(c, 0x09) ^ Multiply(d, 0x0e);
+    }
+
+    void InvMixColumns(AES_CODE* input){
+        for(int i=0;i<ARR_SIZE;++i){
+            byte tmp[] = {*input[0][i],*input[1][i],*input[2][i],*input[3][i]};
+            InvMixColumn(tmp);
+            for(int j=0;j<ARR_SIZE;++j)
+                *input[j][i] = tmp[j];
+        }
+    }
+
 
     void AddRoundKey(AES_CODE* input, AES_CODE* round_key){
         for(int i=0;i<ARR_SIZE;++i){
@@ -155,7 +202,7 @@ namespace  Operations{
       unsigned i, j, k;
       byte cur_val[ARR_SIZE]; // Used for the column/row operations
 
-      cout << ("zz");
+      //cout << ("zz");
       print(key,16,4,3);
 
       for (i = 0; i < Nk * ARR_SIZE; ++i)
@@ -166,7 +213,7 @@ namespace  Operations{
        // all_key[(i * 4) + 3] = key[(i * 4) + 3];
           all_key[i]= key[i];
       }
-      print(all_key,Nk*ARR_SIZE, ARR_SIZE, ARR_SIZE-1);
+      //print(all_key,Nk*ARR_SIZE, ARR_SIZE, ARR_SIZE-1);
       // All other round keys are found from the previous round keys.
       for (i = Nk; i < ARR_SIZE * (Nr + 1); ++i){
         {
@@ -192,7 +239,7 @@ namespace  Operations{
         all_key[j + 1] = all_key[k + 1] ^ cur_val[1];
         all_key[j + 2] = all_key[k + 2] ^ cur_val[2];
         all_key[j + 3] = all_key[k + 3] ^ cur_val[3];
-        cerr << "res = ";print(all_key + j,4);
+        //cerr << "res = ";print(all_key + j,4);
 
       }
 

@@ -12,6 +12,12 @@ typedef unsigned char AES_CODE[4][4];
 const static int Nk = 6;
 const static int Nr = 12;
 
+//#define DEBUG
+#ifdef DEBUG
+#define out(x) cout << (x)
+#else
+#define out(x)
+#endif
 
 namespace Operations {
 
@@ -24,6 +30,12 @@ namespace Operations {
     void ShiftRows(AES_CODE* input);
 
     void MixColumns(AES_CODE* input);
+
+    void InvSubBytes(AES_CODE* input);
+
+    void InvShiftRows(AES_CODE* input);
+
+    void InvMixColumns(AES_CODE* input);
 
     void AddRoundKey(AES_CODE* input, AES_CODE* round_key);
 
