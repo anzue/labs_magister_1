@@ -37,7 +37,7 @@ namespace Operations {
 
     void InvMixColumns(AES_CODE* input);
 
-    void AddRoundKey(AES_CODE* input, AES_CODE* round_key);
+    void AddRoundKey(AES_CODE* input, byte* round_key);
 
     void KeyExpansion(byte* all_key,byte* key);
 

@@ -7,7 +7,8 @@ namespace  Operations{
         for(int i=0;i<count;++i){
             out(std::hex);out((int)word[i]);out(((i%mod == val)? "\n":" "));
         }
-        out("\n");
+        //out("\n");
+        out(std::endl);
     }
 
     static byte sub_bytes_table [] = {
@@ -52,9 +53,9 @@ namespace  Operations{
     void PrintState(AES_CODE* input){
         for(int i=0;i<ARR_SIZE;++i){
             for(int j=0;j<ARR_SIZE;++j){
-                out((int)*input[j][i]);out(' ');
+                out((int)*input[j][i]);//out(' ');
             }
-            out("\n");
+           // out("\n");
         }
         out("\n");
         /*
@@ -173,10 +174,10 @@ namespace  Operations{
     }
 
 
-    void AddRoundKey(AES_CODE* input, AES_CODE* round_key){
+    void AddRoundKey(AES_CODE* input, byte* round_key){
         for(int i=0;i<ARR_SIZE;++i){
             for(int j=0;j<ARR_SIZE;++j){
-                *input[i][j] ^= *round_key[i][j];
+                *input[i][j] ^= round_key[j*ARR_SIZE + i];
             }
         }
     }
@@ -227,11 +228,11 @@ namespace  Operations{
         if (i % Nk == 0)
         {
           RotWord(cur_val);
-         // cerr << "RotWord = ";print(cur_val,4);
+         // cout << "RotWord = ";print(cur_val,4);
           SubWord(cur_val);
-         // cerr << "SubWord = ";print(cur_val,4);
+          //cout << "SubWord = ";print(cur_val,4);
           cur_val[0] = cur_val[0] ^ key_expansion[i/Nk];
-         // cerr << "key_expansion = ";print(cur_val,4);
+        // cout << "key_expansion = ";print(cur_val,4);
 
         }
         j = i * 4; k=(i - Nk) * 4;
@@ -239,7 +240,7 @@ namespace  Operations{
         all_key[j + 1] = all_key[k + 1] ^ cur_val[1];
         all_key[j + 2] = all_key[k + 2] ^ cur_val[2];
         all_key[j + 3] = all_key[k + 3] ^ cur_val[3];
-        //cerr << "res = ";print(all_key + j,4);
+        //cout << "res = ";print(all_key + j,4);
 
       }
 

@@ -26,34 +26,25 @@ namespace AES
             }
         }
         return arr;
-       // return (byte*)code;
     }
 
 
-
     void AES_block(AES_CODE* input, byte* key){
-        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
-
-        Operations::print(key,16,4,3);
-
-        Operations::KeyExpansion(expanded,key);
-
-        Operations::print(expanded,ARR_SIZE*ARR_SIZE* (Nr+1) , 4,3 );
+        Operations::print(key,ARR_SIZE*ARR_SIZE* (Nr+1) , 4,3 );
         out ("Starting\n");
         Operations::PrintState(input);
-        AES_CODE* round_key = as_aes(expanded);
 
-        Operations::AddRoundKey(input,round_key);
+        out("Key\n");
+        Operations::print(key,16,4,3);
+
+        Operations::AddRoundKey(input,key + 0*ARR_SIZE*ARR_SIZE);
         out("AddRoundKey\n");
         Operations::PrintState(input);
 
         for(int i=1;i<Nr;++i){
-            delete round_key;
-            round_key = as_aes(expanded + i* ARR_SIZE*ARR_SIZE);
             out("Starting round "); out(std::dec);out(i);out(std::hex);out("\n");
             Operations::PrintState(input);
-            out ("Key\n");
-            Operations::PrintState(round_key);
+
 
             Operations::SubBytes(input);
             out ("SubBytes\n");
@@ -67,8 +58,11 @@ namespace AES
             out ("MixColumns\n");
             Operations::PrintState(input);
 
-            Operations::AddRoundKey(input,round_key);
-            out ("AddRoundKey\n");
+            out ("Key\n");
+            Operations::print(key + i*ARR_SIZE*ARR_SIZE,16);
+
+            Operations::AddRoundKey(input,key + i*ARR_SIZE*ARR_SIZE);
+            out ("AddRoundKey\n");out(std::endl);
             Operations::PrintState(input);
         }
 
@@ -82,8 +76,10 @@ namespace AES
         out( "ShiftRows\n");
         Operations::PrintState(input);
 
-        round_key = as_aes(expanded + (Nr)* ARR_SIZE*ARR_SIZE);
-        Operations::AddRoundKey(input,round_key);
+        out ("Key\n");
+        Operations::print(key + Nr*ARR_SIZE*ARR_SIZE,16);
+
+        Operations::AddRoundKey(input,key + Nr*ARR_SIZE*ARR_SIZE);
         out( "AddRoundKey\n");
         Operations::PrintState(input);
     }
@@ -97,7 +93,7 @@ namespace AES
 
         for(int i=0;i<ARR_SIZE;++i){
             for(int j=0;j<ARR_SIZE;++j){
-                input[i*ARR_SIZE+j] = *input_as_aes[i][j];
+                input[i*ARR_SIZE+j] = *input_as_aes[j][i];
             }
         }
 
@@ -105,25 +101,24 @@ namespace AES
     }
 
 
-    void AES_base(byte *input,int input_size, byte * cipher){
-        assert(input_size%16 == 0);
-        //AES_CODE tmp;
-        for(int i=0;i<input_size; i+=16){
-            /*
-            memcpy(tmp,input+i,16);
-            AES_block(&tmp, cipher);
-            memcpy(input+i,tmp,16);*/
-            AES_block(input+i,cipher);
-        }
 
-    }
-
-    void AES_decrypt_base(byte *input,int input_size, byte * cipher){
-        assert(input_size%16 == 0);
-        for(int i=0;i<input_size; i+=16){
-            AES_decrypt_block(input+i,cipher);
+    inline void init_from_byte_array(AES_CODE* code,byte* input){
+        for(int i=0;i<ARR_SIZE;++i){
+            for(int j=0;j<ARR_SIZE;++j){
+                *code[i][j] = input[j*ARR_SIZE + i];
+            }
         }
     }
+
+    inline void copy_to_byte_array(AES_CODE* code,byte* input){
+        for(int i=0;i<ARR_SIZE;++i){
+            for(int j=0;j<ARR_SIZE;++j){
+                 input[j*ARR_SIZE + i] = *code[i][j];
+            }
+        }
+    }
+
+
 
     // Both input and key 16 bytes each
     void AES_decrypt_block(byte* input,byte* key){
@@ -137,39 +132,27 @@ namespace AES
                 input[i*ARR_SIZE+j] = *input_as_aes[j][i];
             }
         }
-        delete input_as_aes;
+       // delete input_as_aes;
     }
     void AES_decrypt_block(AES_CODE *input, byte * key){
-        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
 
-        //Operations::print(key,16,4,3);
-
-        Operations::KeyExpansion(expanded,key);
-
-        out("Expanded\n");
-        Operations::print(expanded,ARR_SIZE*ARR_SIZE* (Nr+1) , 4,3 );
+        out("Key\n");
+        Operations::print(key,ARR_SIZE*ARR_SIZE* (Nr+1) , 4,3 );
 
         Operations::print(key,4*6, 4,3 );
 
         out("Starting\n");
         Operations::PrintState(input);
-        AES_CODE* round_key = as_aes(expanded + ARR_SIZE*ARR_SIZE* Nr);
         out("Round key\n");
-        Operations::PrintState(round_key);
+        Operations::print(key, 16,4,3);
 
-        Operations::AddRoundKey(input,round_key);
+        Operations::AddRoundKey(input,key + Nr*ARR_SIZE*ARR_SIZE);
         out("AddRoundKey\n");
         Operations::PrintState(input);
 
         for(int i=Nr-1;i>=1;--i){
-            delete round_key;
-            round_key = as_aes(expanded + i* ARR_SIZE*ARR_SIZE);
-
             out("Starting round "); out(std::dec);out(i);out(std::hex);out("\n");
             Operations::PrintState(input);
-            out("Key\n");
-            Operations::PrintState(round_key);
-
             Operations::InvShiftRows(input);
             out("ShiftRows\n");
             Operations::PrintState(input);
@@ -178,15 +161,16 @@ namespace AES
             out("SubBytes\n");
             Operations::PrintState(input);
 
-            Operations::AddRoundKey(input,round_key);
+            out("Key\n");
+            Operations::print(key + i*ARR_SIZE*ARR_SIZE,16,4,3);
+
+            Operations::AddRoundKey(input,key + i*ARR_SIZE*ARR_SIZE);
             out("AddRoundKey\n");
             Operations::PrintState(input);
 
             Operations::InvMixColumns(input);
             out("MixColumns\n");
             Operations::PrintState(input);
-
-
         }
 
         out("Last iter\n");
@@ -199,10 +183,107 @@ namespace AES
         out("SubBytes\n");
         Operations::PrintState(input);
 
-        round_key = as_aes(expanded + 0);
-        Operations::AddRoundKey(input,round_key);
+        Operations::AddRoundKey(input,key + 0*ARR_SIZE*ARR_SIZE);
         out("AddRoundKey\n");
         Operations::PrintState(input);
-        delete round_key;
     }
+
+
+    void AES_base(byte *input,int input_size, byte * key){
+
+        assert(input_size%16 == 0);
+        int (*tmp)[ARR_SIZE] = new int[ARR_SIZE][ARR_SIZE];
+        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
+        Operations::KeyExpansion(expanded,key);
+        AES_CODE* code = (AES_CODE*)tmp;
+
+        for(int i=0;i<input_size; i+=16){
+            init_from_byte_array(code,input+i);
+            AES_block(code,expanded);
+            copy_to_byte_array(code,input+i);
+        }
+        delete tmp;
+    }
+
+    void AES_decrypt_base(byte *input,int input_size, byte * key){
+        assert(input_size%16 == 0);
+        int (*tmp)[ARR_SIZE] = new int[ARR_SIZE][ARR_SIZE];
+        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
+        Operations::KeyExpansion(expanded,key);
+        AES_CODE* code = (AES_CODE*)tmp;
+
+        for(int i=0;i<input_size; i+=16){
+            init_from_byte_array(code,input+i);
+            AES_decrypt_block(code,expanded);
+            copy_to_byte_array(code,input+i);
+        }
+        delete tmp;
+    }
+
+    void AES_CBC(byte *input,int input_size, byte * key, byte* iv){
+        assert(input_size%16 == 0);
+        int (*tmp)[ARR_SIZE] = new int[ARR_SIZE][ARR_SIZE];
+        AES_CODE* code = (AES_CODE*)tmp;
+
+        byte *cur_xor = new byte[ARR_SIZE*ARR_SIZE];
+        memcpy(cur_xor,iv,ARR_SIZE*ARR_SIZE);
+
+        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
+        Operations::KeyExpansion(expanded,key);
+
+        for(int i=0;i<input_size; i+=16){
+            for(int j=i;j<i+ARR_SIZE*ARR_SIZE;++j){
+                cur_xor[j-i]^=input[j];
+            }
+            init_from_byte_array(code,cur_xor);
+            cout << "Coding \n";
+            //for(int g=0;g<16;++g)cout << (int)cur_xor[g] << " ";cout <<"\n";
+
+            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
+
+            AES_block(code,expanded);
+
+            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
+
+            copy_to_byte_array(code,input+i);
+            memcpy(cur_xor,input+i,ARR_SIZE*ARR_SIZE);
+
+        }
+    }
+
+    void AES_CBC_decrypt(byte *input,int input_size, byte * key, byte* iv){
+        assert(input_size%16 == 0);
+        int (*tmp)[ARR_SIZE] = new int[ARR_SIZE][ARR_SIZE];
+        AES_CODE* code = (AES_CODE*)tmp;
+
+        byte *cur_xor = new byte[ARR_SIZE*ARR_SIZE];
+        byte *save_xor = new byte[ARR_SIZE*ARR_SIZE];
+
+        byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
+        Operations::KeyExpansion(expanded,key);
+
+        memcpy(cur_xor,iv,ARR_SIZE*ARR_SIZE);
+
+        for(int i=0;i<input_size; i+=16){
+            memcpy(save_xor,input+i,ARR_SIZE*ARR_SIZE);
+            init_from_byte_array(code,input+i);
+
+            cout << "DeCoding \n";
+            for(int g=0;g<16;++g)cout << (int)input[i+g] << " ";cout <<"\n";
+
+            AES_decrypt_block(code,expanded);
+
+            copy_to_byte_array(code,input+i);
+            for(int g=0;g<16;++g)cout << (int)input[i+g] << " ";cout <<"\n";
+
+            for(int j=i;j<i+ARR_SIZE*ARR_SIZE;++j){
+                input[j]^= cur_xor[j-i];
+            }
+            for(int g=0;g<16;++g)cout << (int)input[i+g] << " ";cout <<"\n";
+            swap(save_xor,cur_xor);
+        }
+    }
+
+
 };
+

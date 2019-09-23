@@ -20,7 +20,7 @@ byte* from_string(string input){
 
 
 void test_cipher_doc(){
-   // byte cipher[] = {0x8e ,0x73 ,0xb0 ,0xf7 ,0xda ,0x0e ,0x64 ,0x52 ,0xc8 ,0x10 ,0xf3 ,0x2b ,
+  //  byte cipher[] = {0x8e ,0x73 ,0xb0 ,0xf7 ,0xda ,0x0e ,0x64 ,0x52 ,0xc8 ,0x10 ,0xf3 ,0x2b ,
   //                   0x80 ,0x90 ,0x79 ,0xe5 ,0x62 ,0xf8 ,0xea ,0xd2 ,0x52 ,0x2c ,0x6b ,0x7b };
    byte* cipher = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
    byte expanded[ ARR_SIZE*ARR_SIZE* (Nr+1) ];
@@ -44,19 +44,51 @@ void test_2(){
       byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
       cout << "Source     "; for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 
-      AES::AES_block(input,key);
+      AES::AES_base(input,16,key);
 
       Operations::print(input,string("00112233445566778899aabbccddeeff").length());
       cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 
-      AES::AES_decrypt_block(input,key);
+      for(int i=0;i<6*4;++i)
+          cout << (int)key[i] << " ";
+
+      cout<<std::endl;
+
+      AES::AES_decrypt_base(input,16,key);
 
       Operations::print(input,string("00112233445566778899aabbccddeeff").length());
       cout << "Decrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 }
 
+
+void test_CBC(){
+      int len = string("00112233445566778899aabbccddeeff").length()/2 * 2;
+      byte* input = from_string("00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff");
+      byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
+     // byte* iv = from_string("00112233445566778899aabbccddeeff");
+      byte* iv = from_string  ("32143546589743fdaf45daf5eafafaa0");
+      cout << "Source     "; for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+
+      AES::AES_CBC(input,32,key,iv);
+
+      Operations::print(input,string("00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff").length());
+      cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+
+      for(int i=0;i<6*4;++i)
+          cout << (int)key[i] << " ";
+
+      cout<<std::endl;
+
+      AES::AES_CBC_decrypt(input,32,key,iv);
+
+      Operations::print(input,string("00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff").length());
+      cout << "Decrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+}
+
+
+
 int main()
 {
-    test_2();
+    test_CBC();
     return 0;
 }
