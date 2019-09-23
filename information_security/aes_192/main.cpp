@@ -87,8 +87,34 @@ void test_CBC(){
 
 
 
+void test_CFB(){
+      int len = string("00112233445566778899aabbccddeeff").length()/2 * 2;
+      byte* input = from_string("00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff");
+      byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
+      byte* iv = from_string("00112233445566778899aabbccddeeff");
+    //  byte* iv = from_string  ("32143546589743fdaf45daf5eafafaa0");
+      cout << "Source     "; for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+
+      AES::AES_CFB(input,32,key,iv);
+
+      Operations::print(input,len);
+      cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+
+      for(int i=0;i<6*4;++i)
+          cout << (int)key[i] << " ";
+
+      cout<<std::endl;
+
+      AES::AES_CFB_decrypt(input,32,key,iv);
+
+      Operations::print(input,len);
+      cout << "Decrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
+}
+
+
+
 int main()
 {
-    test_CBC();
+    test_CFB();
     return 0;
 }

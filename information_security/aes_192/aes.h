@@ -16,6 +16,8 @@ namespace AES {
     void AES_decrypt_base(byte *input,int input_size, byte * cipher);
     void AES_CBC(byte *input,int input_size, byte * key, byte* iv);
     void AES_CBC_decrypt(byte *input,int input_size, byte * key, byte* iv);
+    void AES_CFB(byte *input,int input_size, byte * key, byte* iv);
+    void AES_CFB_decrypt(byte *input,int input_size, byte * key, byte* iv);
 
 }
 #endif // AES_H

@@ -11,6 +11,16 @@ namespace  Operations{
         out(std::endl);
     }
 
+    void PrintState(AES_CODE* input){
+        for(int i=0;i<ARR_SIZE;++i){
+            for(int j=0;j<ARR_SIZE;++j){
+                out((int)*input[j][i]);//out(' ');
+            }
+           // out("\n");
+        }
+        out("\n");
+    }
+
     static byte sub_bytes_table [] = {
                  0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
                  0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -49,25 +59,6 @@ namespace  Operations{
                 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
                 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
          };
-
-    void PrintState(AES_CODE* input){
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                out((int)*input[j][i]);//out(' ');
-            }
-           // out("\n");
-        }
-        out("\n");
-        /*
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                out(std::hex);out((int)*input[i][j]);out(" ");
-            }
-            out("\n");
-        }
-        out(std::endl);*/
-    }
-
 
     void SubBytes(AES_CODE* input){
         for(int i=0;i<ARR_SIZE;++i){
@@ -117,8 +108,6 @@ namespace  Operations{
                 *input[j][i] = tmp[j];
         }
     }
-
-
 
     void InvSubBytes(AES_CODE* input){
         for(int i=0;i<ARR_SIZE;++i){
@@ -201,21 +190,14 @@ namespace  Operations{
     void KeyExpansion(byte* all_key,byte* key)
     {
       unsigned i, j, k;
-      byte cur_val[ARR_SIZE]; // Used for the column/row operations
+      byte cur_val[ARR_SIZE];
 
       //cout << ("zz");
       print(key,16,4,3);
 
-      for (i = 0; i < Nk * ARR_SIZE; ++i)
-      {
-       // all_key[(i * 4) + 0] = key[(i * 4) + 0];
-       // all_key[(i * 4) + 1] = key[(i * 4) + 1];
-       // all_key[(i * 4) + 2] = key[(i * 4) + 2];
-       // all_key[(i * 4) + 3] = key[(i * 4) + 3];
+      for (i = 0; i < Nk * ARR_SIZE; ++i){
           all_key[i]= key[i];
       }
-      //print(all_key,Nk*ARR_SIZE, ARR_SIZE, ARR_SIZE-1);
-      // All other round keys are found from the previous round keys.
       for (i = Nk; i < ARR_SIZE * (Nr + 1); ++i){
         {
           k = (i - 1) * 4;
@@ -228,11 +210,8 @@ namespace  Operations{
         if (i % Nk == 0)
         {
           RotWord(cur_val);
-         // cout << "RotWord = ";print(cur_val,4);
           SubWord(cur_val);
-          //cout << "SubWord = ";print(cur_val,4);
           cur_val[0] = cur_val[0] ^ key_expansion[i/Nk];
-        // cout << "key_expansion = ";print(cur_val,4);
 
         }
         j = i * 4; k=(i - Nk) * 4;
@@ -240,14 +219,8 @@ namespace  Operations{
         all_key[j + 1] = all_key[k + 1] ^ cur_val[1];
         all_key[j + 2] = all_key[k + 2] ^ cur_val[2];
         all_key[j + 3] = all_key[k + 3] ^ cur_val[3];
-        //cout << "res = ";print(all_key + j,4);
 
       }
-
-
-//      cout << ("uuu");
-//      print(all_key,(Nr+1)*16,4,3);
-
     }
 
 
