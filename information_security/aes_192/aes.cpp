@@ -288,20 +288,12 @@ namespace AES
         for(int i=0;i<input_size; i+=16){
 
             init_from_byte_array(code,cur_xor);
-
-            cout << "Coding \n";
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
-
             AES_block(code,expanded);
             copy_to_byte_array(code,cur_xor);
-
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
 
             for(int j=i;j<i+ARR_SIZE*ARR_SIZE;++j){
                 input[j]^=cur_xor[j-i];
             }
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)input[i+g] << " ";cout<<"\n";
-
             memcpy(cur_xor,input+i,ARR_SIZE*ARR_SIZE);
         }
     }
@@ -320,22 +312,14 @@ namespace AES
         Operations::KeyExpansion(expanded,key);
 
         for(int i=0;i<input_size; i+=16){
-
             init_from_byte_array(code,cur_xor);
-
-            cout << "Coding \n";
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
-
             AES_block(code,expanded);
             copy_to_byte_array(code,cur_xor);
 
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)*code[g%4][g/4] << " ";cout<<"\n";
             memcpy(save_xor,input+i,ARR_SIZE*ARR_SIZE);
             for(int j=i;j<i+ARR_SIZE*ARR_SIZE;++j){
                 input[j]^=cur_xor[j-i];
             }
-            for(int g=0;g<16;++g)cout<<std::hex<<(int)input[i+g] << " ";cout<<"\n";
-
             memcpy(cur_xor,save_xor,ARR_SIZE*ARR_SIZE);
         }
     }

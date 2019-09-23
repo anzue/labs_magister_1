@@ -142,7 +142,7 @@ namespace  Operations{
            ((y>>1 & 1) * xtime(x)) ^
            ((y>>2 & 1) * xtime(xtime(x))) ^
            ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
-           ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
+           ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))));
       }
 
     void InvMixColumn(byte* column){
@@ -161,7 +161,6 @@ namespace  Operations{
                 *input[j][i] = tmp[j];
         }
     }
-
 
     void AddRoundKey(AES_CODE* input, byte* round_key){
         for(int i=0;i<ARR_SIZE;++i){
@@ -187,39 +186,32 @@ namespace  Operations{
     static const byte key_expansion[] = {
       0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
-    void KeyExpansion(byte* all_key,byte* key)
-    {
-      unsigned i, j, k;
+    void KeyExpansion(byte* all_key,byte* key){
       byte cur_val[ARR_SIZE];
 
       //cout << ("zz");
-      print(key,16,4,3);
+      //print(key,16,4,3);
 
-      for (i = 0; i < Nk * ARR_SIZE; ++i){
+      for (int i = 0; i < Nk * ARR_SIZE; ++i){
           all_key[i]= key[i];
       }
-      for (i = Nk; i < ARR_SIZE * (Nr + 1); ++i){
+      for (int i = Nk; i < ARR_SIZE * (Nr + 1); ++i){
         {
-          k = (i - 1) * 4;
-          cur_val[0]=all_key[k + 0];
-          cur_val[1]=all_key[k + 1];
-          cur_val[2]=all_key[k + 2];
-          cur_val[3]=all_key[k + 3];
 
+          for(int j=0;j<4;++j){
+              cur_val[j] = all_key[4*i-4+j];
+          }
         }
         if (i % Nk == 0)
         {
           RotWord(cur_val);
           SubWord(cur_val);
-          cur_val[0] = cur_val[0] ^ key_expansion[i/Nk];
+          cur_val[0] = cur_val[0] ^ key_expansion[1 << (i/Nk)];
 
         }
-        j = i * 4; k=(i - Nk) * 4;
-        all_key[j + 0] = all_key[k + 0] ^ cur_val[0];
-        all_key[j + 1] = all_key[k + 1] ^ cur_val[1];
-        all_key[j + 2] = all_key[k + 2] ^ cur_val[2];
-        all_key[j + 3] = all_key[k + 3] ^ cur_val[3];
-
+        for(int j=0;j<4;++j){
+            all_key[4*i+j] = all_key[4*(i-Nk) + j]^cur_val[j];
+        }
       }
     }
 

@@ -46,17 +46,13 @@ void test_2(){
 
       AES::AES_base(input,16,key);
 
-      Operations::print(input,string("00112233445566778899aabbccddeeff").length());
+      Operations::print(input,len);
       cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 
-      for(int i=0;i<6*4;++i)
-          cout << (int)key[i] << " ";
-
-      cout<<std::endl;
 
       AES::AES_decrypt_base(input,16,key);
 
-      Operations::print(input,string("00112233445566778899aabbccddeeff").length());
+      Operations::print(input,len);
       cout << "Decrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 }
 
@@ -73,11 +69,6 @@ void test_CBC(){
 
       Operations::print(input,string("00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff").length());
       cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
-
-      for(int i=0;i<6*4;++i)
-          cout << (int)key[i] << " ";
-
-      cout<<std::endl;
 
       AES::AES_CBC_decrypt(input,32,key,iv);
 
@@ -100,11 +91,6 @@ void test_CFB(){
       Operations::print(input,len);
       cout << "Encrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 
-      for(int i=0;i<6*4;++i)
-          cout << (int)key[i] << " ";
-
-      cout<<std::endl;
-
       AES::AES_CFB_decrypt(input,32,key,iv);
 
       Operations::print(input,len);
@@ -112,9 +98,8 @@ void test_CFB(){
 }
 
 
-
 int main()
 {
-    test_CFB();
+    test_2();
     return 0;
 }
