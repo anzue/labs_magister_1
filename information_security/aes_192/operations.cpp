@@ -206,7 +206,7 @@ namespace  Operations{
         {
           RotWord(cur_val);
           SubWord(cur_val);
-          cur_val[0] = cur_val[0] ^ key_expansion[1 << (i/Nk)];
+          cur_val[0] = cur_val[0] ^ key_expansion[i/Nk];
 
         }
         for(int j=0;j<4;++j){

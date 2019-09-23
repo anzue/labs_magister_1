@@ -1,4 +1,9 @@
 #include <iostream>
+#include <time.h>
+#include <fstream>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 #include "aes.h"
 
 using namespace std;
@@ -98,8 +103,67 @@ void test_CFB(){
 }
 
 
+void encrypt_file_CBC(string file_in, string file_out){
+    int start_time = time(0);
+    ifstream myfile;
+    myfile.open(file_in.c_str(),ios::binary);
+
+    cout << myfile.is_open() << std::endl;
+    int size = 256*256;
+    byte buffer[size];
+
+    byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
+    byte* iv =  from_string("00112233445566778899aabbccddeeff");
+    ofstream outfile;
+    outfile.open(file_out.c_str(),ios::binary  | ios::out);
+
+    while(myfile.read((char*)buffer,size)){
+        AES::AES_CBC(buffer,size,key,iv);
+        outfile.write((char*)buffer,size);
+    }
+    if(myfile.tellg()%size){
+        memset(buffer+myfile.tellg()%size, ' ',size - myfile.tellg()%size);
+        AES::AES_CBC(buffer,size,key,iv);
+        outfile.write((char*)buffer,size);
+    }
+    myfile.close();
+    outfile.close();
+
+}
+
+void decrypt_file_CBC(string file_in, string file_out){
+    int start_time = clock();
+    ifstream myfile;
+    myfile.open(file_in.c_str(),ios::binary);
+
+    int size = 256*256;
+    byte buffer[size];
+
+    byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
+    byte* iv =  from_string("00112233445566778899aabbccddeeff");
+    ofstream outfile;
+    outfile.open(file_out.c_str(),ios::binary  | ios::out);
+
+    while(myfile.read((char*)buffer,size)){
+        AES::AES_CBC_decrypt(buffer,size,key,iv);
+        outfile.write((char*)buffer,size);
+    }
+    if(myfile.tellg()%size){
+        memset(buffer+myfile.tellg()%size, ' ',size - myfile.tellg()%size);
+        AES::AES_CBC_decrypt(buffer,size,key,iv);
+        outfile.write((char*)buffer,size);
+    }
+    myfile.close();
+    outfile.close();
+
+    cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC;
+
+}
+
+
 int main()
 {
-    test_1_doc();
+    encrypt_file_CBC("hamlet.txt","out.txt");
+    decrypt_file_CBC("out.txt","check.txt");
     return 0;
 }

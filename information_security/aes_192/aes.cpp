@@ -202,9 +202,7 @@ namespace AES
                 cur_xor[j-i]^=input[j];
             }
             init_from_byte_array(code,cur_xor);
-
             AES_block(code,expanded);
-
             copy_to_byte_array(code,input+i);
             memcpy(cur_xor,input+i,ARR_SIZE*ARR_SIZE);
 
