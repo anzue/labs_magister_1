@@ -4,6 +4,10 @@
 #include "operations.h"
 
 namespace AES {
+
+
+    AES_CODE* as_aes(byte* key, bool reverse = true);
+
     // operations on 16b codes
     void AES_block(AES_CODE* input, byte* key);
     void AES_decrypt_block(AES_CODE *input, byte * key);

@@ -4,7 +4,7 @@
 
 namespace AES
 {
-    AES_CODE* as_aes(byte* key, bool reverse = true){
+    AES_CODE* as_aes(byte* key, bool reverse){
         int (*res)[ARR_SIZE] = new int[ARR_SIZE][ARR_SIZE];
         for(int i=0;i<ARR_SIZE;++i){
             for(int j=0;j<ARR_SIZE;++j){
@@ -27,7 +27,6 @@ namespace AES
         }
         return arr;
     }
-
 
     void AES_block(AES_CODE* input, byte* key){
         Operations::print(key,ARR_SIZE*ARR_SIZE* (Nr+1) , 4,3 );
@@ -84,23 +83,6 @@ namespace AES
         Operations::PrintState(input);
     }
 
-    // Both input and key 16 bytes each
-    void AES_block(byte* input,byte* key){
-
-        AES_CODE* input_as_aes = as_aes(input);
-
-        AES_block(input_as_aes,key);
-
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                input[i*ARR_SIZE+j] = *input_as_aes[j][i];
-            }
-        }
-
-        delete input_as_aes;
-    }
-
-
 
     inline void init_from_byte_array(AES_CODE* code,byte* input){
         for(int i=0;i<ARR_SIZE;++i){
@@ -118,22 +100,6 @@ namespace AES
         }
     }
 
-
-
-    // Both input and key 16 bytes each
-    void AES_decrypt_block(byte* input,byte* key){
-
-        AES_CODE* input_as_aes = as_aes(input,false);
-
-        AES_decrypt_block(input_as_aes,key);
-
-        for(int i=0;i<ARR_SIZE;++i){
-            for(int j=0;j<ARR_SIZE;++j){
-                input[i*ARR_SIZE+j] = *input_as_aes[j][i];
-            }
-        }
-       // delete input_as_aes;
-    }
     void AES_decrypt_block(AES_CODE *input, byte * key){
 
         out("Key\n");
