@@ -103,40 +103,50 @@ void test_CFB(){
 }
 
 
+std::ifstream::pos_type filesize(string filename){
+    std::ifstream in(filename.c_str(), std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
+}
+
+
 void encrypt_file_CBC(string file_in, string file_out){
-    int start_time = time(0);
+    int start_time = clock();
+    int size = 256*256;
+    int last_block_size = filesize(file_in)%size;
     ifstream myfile;
     myfile.open(file_in.c_str(),ios::binary);
 
-    cout << myfile.is_open() << std::endl;
-    int size = 256*256;
     byte buffer[size];
 
     byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
     byte* iv =  from_string("00112233445566778899aabbccddeeff");
     ofstream outfile;
+
     outfile.open(file_out.c_str(),ios::binary  | ios::out);
 
     while(myfile.read((char*)buffer,size)){
         AES::AES_CBC(buffer,size,key,iv);
         outfile.write((char*)buffer,size);
     }
-    if(myfile.tellg()%size){
-        memset(buffer+myfile.tellg()%size, ' ',size - myfile.tellg()%size);
+    if(last_block_size){
+        memset(buffer+last_block_size, 0 ,size - last_block_size);
         AES::AES_CBC(buffer,size,key,iv);
         outfile.write((char*)buffer,size);
     }
     myfile.close();
     outfile.close();
+    cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC << std::endl;
 
 }
 
 void decrypt_file_CBC(string file_in, string file_out){
     int start_time = clock();
+    int size = 256*256;
+    int last_block_size = filesize(file_in)%size;
+
     ifstream myfile;
     myfile.open(file_in.c_str(),ios::binary);
 
-    int size = 256*256;
     byte buffer[size];
 
     byte* key = from_string("000102030405060708090a0b0c0d0e0f1011121314151617");
@@ -149,21 +159,23 @@ void decrypt_file_CBC(string file_in, string file_out){
         outfile.write((char*)buffer,size);
     }
     if(myfile.tellg()%size){
-        memset(buffer+myfile.tellg()%size, ' ',size - myfile.tellg()%size);
+        memset(buffer+last_block_size, 0,size -last_block_size);
         AES::AES_CBC_decrypt(buffer,size,key,iv);
         outfile.write((char*)buffer,size);
     }
     myfile.close();
     outfile.close();
 
-    cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC;
-
+    cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC << std::endl;
 }
 
 
 int main()
 {
+    test_2();
     encrypt_file_CBC("hamlet.txt","out.txt");
     decrypt_file_CBC("out.txt","check.txt");
+   // encrypt_file_CBC("Tux.jpg","out");
+   // decrypt_file_CBC("out","check.jpg");
     return 0;
 }
