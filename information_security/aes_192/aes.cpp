@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
 #include "aes.h"
 
 
@@ -168,7 +170,7 @@ namespace AES
             AES_block(code,expanded);
             copy_to_byte_array(code,input+i);
         }
-        delete tmp;
+        //delete tmp;
     }
 
     void AES_decrypt_base(byte *input,int input_size, byte * key){
@@ -183,7 +185,7 @@ namespace AES
             AES_decrypt_block(code,expanded);
             copy_to_byte_array(code,input+i);
         }
-        delete tmp;
+        //delete tmp;
     }
 
     void AES_CBC(byte *input,int input_size, byte * key, byte* iv){

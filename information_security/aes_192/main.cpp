@@ -102,6 +102,11 @@ void test_CFB(){
       cout << "Decrypted  ";for(int i=0;i<len;++i)cout << std::hex << (int)input[i];cout <<"\n";
 }
 
+std::ifstream::pos_type filesize(string filename){
+    std::ifstream in(filename.c_str(), std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
+}
+
 
 std::ifstream::pos_type filesize(string filename){
     std::ifstream in(filename.c_str(), std::ifstream::ate | std::ifstream::binary);
@@ -135,7 +140,11 @@ void encrypt_file_CBC(string file_in, string file_out){
     }
     myfile.close();
     outfile.close();
+<<<<<<< HEAD
     cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC << std::endl;
+=======
+    cout << "Time = " << 1.*(clock() - start_time) / CLOCKS_PER_SEC;
+>>>>>>> Last changes
 
 }
 
