@@ -1,19 +1,18 @@
-#include <iostream>
-#include <stdlib.h>
-#include <bitset>
-#include <cstdio>
-#include <stdlib.h>
-#include <string>
-#include <cstring>
-
-using namespace std;
-
+#include "defines.h"
+#include <iomanip>
 #define shr(x,a) (x>>a)
 #define rotr(x,a) ((x>>a) | (x << (32 - a)) )
 #define asbits(x) (std::bitset<8*sizeof(int)>(x))
 
+using namespace std;
+
 namespace SHA2 {
 
+
+
+ //for 256
+
+/*
 unsigned int
           h0 = 0x6A09E667,
           h1 = 0xBB67AE85,
@@ -23,6 +22,25 @@ unsigned int
           h5 = 0x9B05688C,
           h6 = 0x1F83D9AB,
           h7 = 0x5BE0CD19;
+
+
+const int word_count =16;
+const int total_count = 64;
+*/
+
+
+unsigned int
+    h0 = 0xC1059ED8,
+    h1 = 0x367CD507,
+    h2 = 0x3070DD17,
+    h3 = 0xF70E5939,
+    h4 = 0xFFC00B31,
+    h5 = 0x68581511,
+    h6 = 0x64F98FA7,
+    h7 = 0xBEFA4FA4;
+
+const int word_count =16;
+const int total_count = 64;
 
 const unsigned int k[] =
   {0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -34,8 +52,7 @@ const unsigned int k[] =
    0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
    0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2};
 
-const int word_count =16;
-const int total_count = 64;
+
 void get_word_hash(unsigned int* w){
     unsigned int s0,s1;
     unsigned int a,b,c,d,e,f,g,h;
@@ -57,7 +74,7 @@ void get_word_hash(unsigned int* w){
        h = g;g = f;f = e;e = d + t1;
        d = c;c = b;b = a;a = t1 + t2;
 
-       cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
+       //cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
 
     }
     h0 = h0 + a;
@@ -87,9 +104,13 @@ void print_arr(unsigned int* arr ,int size = 1, bool hex = false){
 
 void print_res(bool hex=false){
     if(hex){
-        cout << std::hex
+        result<< std::hex<< h0 << h1 << h2 << h3 << h4 << h5 << h6;
+
+        cout << std::hex << std::setfill('0') << std::setw(2)
              << h0 << " "<< h1 << " "<< h2 << " "<< h3 << " "
-             << h4 << " "<< h5 << " "<< h6 << " "<< h7 << "\n";
+             << h4 << " "<< h5 << " "<< h6 << " "
+           //  << h7  - for 256 only
+             << "\n";
         return;
     }
     cout << asbits(h0) << " "
@@ -99,10 +120,11 @@ void print_res(bool hex=false){
          << asbits(h4) << " "
          << asbits(h5) << " "
          << asbits(h6) << " "
-         << asbits(h7) << "\n";
+         // << asbits(h7) for 256 only
+         << "\n";
 }
 
-void SHA_main(string s){
+void SHA2_main(string s){
     int coded_size = (s.length() / 4 )  + 1;
     unsigned int arr[(coded_size/16 + 1)*16] = {0};
     for(int i=0;i<(int)s.length();++i){
@@ -112,20 +134,20 @@ void SHA_main(string s){
     }
 
     int real_size  = (coded_size/16 + 1)*16;
-    cout << "Input bits = " <<std::dec << coded_size << ", res bits = "<< 32*real_size << "\n";
+   // cout << "Input bits = " <<std::dec << coded_size << ", res bits = "<< 32*real_size << "\n";
     arr[s.length()/4] |= (1<< (7 + 8*(3-s.length()%4)));
     arr[real_size-1] = (8*s.length()) ;
     arr[real_size-2] = (8*(long long)s.length()) >> 32;
 
     //cout << arr[real_size-1] <<  " " << arr[real_size-2]<<"\n";
 
-    print_arr(arr,real_size,true);
+   // print_arr(arr,real_size,true);
     unsigned int tmp[64];
     for(int i=0;i<real_size;i+=16){
         memcpy(tmp,arr,16*sizeof(int));
       //  print_arr(tmp,16,false);
         SHA2::get_word_hash(tmp);
-        SHA2::print_res(true);
+     //   SHA2::print_res(true);
 
     }
     SHA2::print_res(true);

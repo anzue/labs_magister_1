@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.cpp \
-    sha_224.cpp
+    sha_224.cpp \
+    sha_3_512.cpp
 
-HEADERS +=
+HEADERS += \
+    defines.h
