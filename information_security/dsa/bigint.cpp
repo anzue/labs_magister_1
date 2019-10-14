@@ -3,7 +3,8 @@
 
 void BigInt::init(int size){
     if(DEBUG)cerr <<"init" << std::endl;
-
+    if(size < 1)
+        size = 1;
     values = new Value_type[size];
     values_size = size;
     values[0] = 0;
@@ -31,18 +32,19 @@ BigInt::BigInt(const BigInt& old){
     if(DEBUG){
         cerr <<"BigInt2 " << old.len << " "<<old.values_size<< std::endl;
         cerr << this <<"\n";
-        cerr << "old : ";old.print(std::cerr,PrintType::HEX,3);
-
-        if(old.len == 6 && old.values_size == 9){
-            cerr << "zzz";
-        }
+        //cerr << "old : ";old.print(std::cerr,PrintType::HEX,3);
 
     }
     len = old.len;
-    values_size = old.values_size;
+    values_size = len;
     values = new Value_type[len];
     if(old.values) // TODO why is this needed
         memcpy(values,old.values,len*sizeof(Value_type));
+
+    if(DEBUG){
+        cerr <<"BigInt2 " << old.len << " "<<old.values_size<< std::endl;
+        cerr <<"BigInt2 " << values << " "<<values+len<< std::endl;
+    }
 }
 
 void BigInt::resize(int new_size){
@@ -55,10 +57,9 @@ void BigInt::resize(int new_size){
         new_size = 1;
     }
     Value_type* new_arr = new Value_type[new_size];
-    if(values){
-        memcpy(new_arr,values,len*sizeof(Value_type));
-        delete values;
-    }
+    memcpy(new_arr,values,len*sizeof(Value_type));
+    delete values;
+
     values = new_arr;
     if(len < new_size){
         memset(values+len,0,(new_size-len)*sizeof(Value_type));
@@ -74,7 +75,7 @@ void BigInt::update_len(){
 void BigInt::upscale(int new_size){
     if(DEBUG){
         cerr <<"upscale" << std::endl;
-        cerr <<"old arr" << values <<"\n";
+        cerr <<"old arr" << values << " " << values + values_size << "\n";
     }
     if(new_size > values_size){
         if(new_size > values_size + values_size)
@@ -83,7 +84,7 @@ void BigInt::upscale(int new_size){
             resize(values_size+values_size);
     }
     if(DEBUG){
-        cerr <<"New array " << values <<"\n";
+        cerr <<"new arr" << values << " " << values + values_size << "\n";
     }
 }
 
@@ -151,7 +152,7 @@ BigInt BigInt::operator=(const BigInt& old) {
         delete values;
     }
     len = old.len;
-    values_size = old.values_size;
+    values_size = len;
     values = new Value_type[len];
     if(old.values)
         memcpy(values,old.values,len*sizeof(Value_type));
@@ -268,7 +269,7 @@ BigInt BigInt::operator/=(const BigInt& a){
     while( l + one < r){
         m = (l+r).div2();
 
-/*
+        /*
         l.print(cout, PrintType::HEX,8);
         m.print(cout, PrintType::HEX,8);
         r.print(cout, PrintType::HEX,8);
@@ -282,7 +283,7 @@ BigInt BigInt::operator/=(const BigInt& a){
         }else{
             r = m;
         }
-/*
+        /*
         l.print(cout, PrintType::HEX,8);
         m.print(cout, PrintType::HEX,8);
         r.print(cout, PrintType::HEX,8);
@@ -292,7 +293,7 @@ BigInt BigInt::operator/=(const BigInt& a){
         cout <<"\n";
 */
     }
-/*
+    /*
     l.print(cout, PrintType::HEX,8);
     a.print(cout, PrintType::HEX,8);
     (l*a).print(cout, PrintType::HEX,8);
@@ -385,8 +386,7 @@ int char_code(char c){
     return 0;
 }
 BigInt BigInt::operator+=(const Value_type a){
-    ++len;
-    upscale(len);
+    upscale(len+1);
     Value_type add = a;
     values[len] = 0;
     for(int i=0;i<len && add >= 0;++i){
@@ -394,6 +394,8 @@ BigInt BigInt::operator+=(const Value_type a){
         values[i] = add & ( mod_part - 1);
         add >>= type_value_size;
     }
+    ++len;
+    update_len();
     return *this;
 }
 BigInt::BigInt(const string& old,int num_base/* = 10*/){
@@ -402,11 +404,11 @@ BigInt::BigInt(const string& old,int num_base/* = 10*/){
     BigInt base =  BigInt(num_base);
     for(int i=0;i<old.length();++i){
 
-       // BigInt v1 = BigInt(num_base);
-       // BigInt v2 = BigInt(char_code(old[i]));
+        // BigInt v1 = BigInt(num_base);
+        // BigInt v2 = BigInt(char_code(old[i]));
         tmp = tmp * base + BigInt((int)char_code(old[i]));
-       // *this*=v1;
-       // *this+=v2;
+        // *this*=v1;
+        // *this+=v2;
     }
     *this = tmp;
 }
@@ -414,21 +416,20 @@ BigInt::BigInt(const string& old,int num_base/* = 10*/){
 BigInt::~BigInt(){
     if(DEBUG){
         cerr << "~BigInt\n";
-        cerr << len << " " << values_size << " " << values <<"\n";
+        cerr << len << " " << values_size << " " << values << " "<< values + 1 << " " <<"\n";
         if(values)print(std::cerr, PrintType::HEX,3);
         cerr << std::endl;
 
     }
     if(values){
         delete values;
-        values = nullptr;
         len = 1;
         values_size = 1;
     }
 }
 
 BigInt extEclid(BigInt a,BigInt b, BigInt &x, BigInt & y , BigInt mod){
-    if(a == 0){
+    if(a == zero){
         x = 0;y=1;
         return b;
     }

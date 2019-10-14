@@ -105,9 +105,9 @@ void print_arr(unsigned int* arr ,int size/* = 1*/, bool hex/* = false*/){
 string print_res(bool hex/*=false*/){
     stringstream result;
     if(hex){
-        result<< std::hex<< h0 << h1 << h2 << h3 << h4 << h5 << h6;
+        //result<< std::hex<< h0 << h1 << h2 << h3 << h4 << h5 << h6;
 
-        cout << std::hex << std::setfill('0') << std::setw(2)
+        result << std::hex << std::setfill('0') << std::setw(2)
              << h0 << " "<< h1 << " "<< h2 << " "<< h3 << " "
              << h4 << " "<< h5 << " "<< h6 << " "
                 //  << h7  - for 256 only

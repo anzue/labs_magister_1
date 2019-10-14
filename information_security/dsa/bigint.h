@@ -73,7 +73,7 @@ public:
     BigInt operator%(const BigInt& a);
 
     operator bool() const{return !((*this) == BigInt(0));}
-    int get_len(){return len;}
+    int get_len()const{return len;}
 };
 const BigInt
             zero = 0,
