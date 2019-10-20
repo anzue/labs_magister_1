@@ -106,6 +106,12 @@ void BigInt::print(ostream& str/* = cout*/, PrintType type /*= PrintType::DEC*/,
     }
     if(type == DEC){
         stringstream out;
+
+        if(*this == zero){
+            str << "0\n";
+            return;
+        }
+
         BigInt tmp(*this);
         while( tmp > BigInt(0)){
             out << (tmp%BigInt(10)).values[0];
@@ -123,7 +129,7 @@ void BigInt::print(ostream& str/* = cout*/, PrintType type /*= PrintType::DEC*/,
     if(type == HEX) str <<  setfill('0') << setw(4) << std::hex;
     if(padding < len) padding = len;
     for(int i=padding-1;i>=0;--i)
-        str <<  setfill('0') << setw(4) << get_value_at(i) << " ";
+        str <<  setfill('0') << setw(4) << get_value_at(i) << "";
     str<<"\n";
 }
 
@@ -247,11 +253,14 @@ BigInt BigInt::div2(){
     if(DEBUG)cerr <<"Div2" << std::endl;
     BigInt res(*this);
     int bit = 0;
+
+
     for(int i=len-1;i>=0;--i){
         res.values[i] |= (bit << type_value_size);
         bit = res.values[i] & 1;
         res.values[i] >>= 1;
     }
+
     res.update_len();
     return res;
 }
@@ -262,7 +271,7 @@ BigInt BigInt::operator/=(const BigInt& a){
         cout << "ww";this->print(std::cout,PrintType::HEX,2);
         cout << "ww";a.print(std::cout,PrintType::HEX,2);
     }
-    BigInt l = 1,
+    BigInt l = 0,
             r = *this,
             m;
     BigInt one = BigInt(1);
@@ -323,12 +332,12 @@ BigInt BigInt::operator-=(const BigInt& a){
     }
     int minus_one = 0;
     for(int i=0;i< len;++i){
-        values[i]-=minus_one;
-        if(values[i] < a.get_value_at(i)){
-            values[i]+= mod_part-a.get_value_at(i);
+        // values[i]-=minus_one;
+        if(values[i] < a.get_value_at(i) + minus_one){
+            values[i] += mod_part-a.get_value_at(i) - minus_one;
             minus_one = 1;
         }else{
-            values[i]-=a.get_value_at(i);
+            values[i]-=a.get_value_at(i) + minus_one;
             minus_one = 0;
         }
     }
@@ -343,19 +352,21 @@ BigInt BigInt::operator-(const BigInt& a) const {
 
 BigInt BigInt::operator%(const BigInt& a){
 
-    /*if (  (*this - (*this/a)*a) >= a){
+    if (  (*this - (*this/a)*a) >= a){
+        cout << "ZZZZZzzzzz\n";
+        this->print(cout,PrintType::HEX);
+        a.print(cout,PrintType::HEX);
 
-        this->print(cout,PrintType::DEC);
-        a.print(cout,PrintType::DEC);
+        (*this/a).print(cout,PrintType::HEX);
+        (*this/a*a).print(cout,PrintType::HEX);
+        BigInt ll = (*this/a)*a;
 
-        (*this/a).print(cout,PrintType::DEC);
-        (*this/a*a).print(cout,PrintType::DEC);
-        (*this - (*this/a)*a).print(cout,PrintType::DEC);
+        (*this - ll ).print(cout,PrintType::HEX);
 
         cout << (*this - (*this/a)*a).len << " " << a.len <<"\n";
 
-        cout<<"tt";  (*this - (*this/a)*a).print(cout,PrintType::DEC);
-        cout<<"gg"; a.print(cout,PrintType::DEC);cout<<"\n";}*/
+        cout<<"tt";  (*this - (*this/a)*a).print(cout,PrintType::HEX);
+        cout<<"gg"; a.print(cout,PrintType::HEX);cout<<"\n";}
 
     return *this - (*this/a)*a;
 }
@@ -484,17 +495,31 @@ BigInt REDC(BigInt T,BigInt R,BigInt N){
 
 BigInt binpow(BigInt x,BigInt pow,BigInt mod){
     BigInt r = 1;
+
+    //   cout <<"ST";
+
     while(pow>zero){
-        if(pow%two==1)
+        if(pow%two==one)
             r = (r*x)%mod;
+
+
+        //       cout << "\n";
+        //       x.print();
+        //       (x*x).print();
+        //       ((x*x)%mod).print();
+        //       cout << "\n";
+
         x = (x*x)%mod;
         pow=pow.div2();
-        /*
-        cout << "ZZZ";x.print();
-        cout << "ZZZ";r.print();
-        cout << "ZZZ";mod.print();cout<<"\n";*/
+
+        //        cout << "ZZZ";x.print();
+        //        cout << "ZZZ";r.print();
+        //        cout << "ZZZ";pow.print();cout<<"\n";
 
     }
+
+    // cout <<"FIN\n";
+
     return r;
 }
 
@@ -502,7 +527,7 @@ BigInt binpow(BigInt x,BigInt pow,BigInt mod){
 BigInt binpow_mont(BigInt x,BigInt pow,BigInt mod){
     BigInt r = 1;
     while(pow>zero){
-        if(pow%two==1)
+        if(pow%two==one)
             r = Montgomeri(r,x,mod);
         x = Montgomeri(x,x,mod);
         pow=pow/two;

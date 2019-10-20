@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "sha_224.h"
+#include "sha_224.cpp"
 #include "bigint.h"
 
 using namespace std;
@@ -64,8 +64,11 @@ void parametr_generation(BigInt& p,BigInt& q,BigInt& g)
     //    int L = 1024; // key length
     //    int N = 160;  // N - modulo
 
-    int L = 24; // key length
-    int N = 16;  // N - modulo
+        int L = 24*4; // key length
+        int N = 16*4;  // N - modulo
+
+//    int L = 16; // key length
+//    int N = 8;  //N - modulo
 
     q = get_random_prime(N/8);
 
@@ -75,8 +78,7 @@ void parametr_generation(BigInt& p,BigInt& q,BigInt& g)
     }
     p = q*pdivq + one;
 
-    /*
-    BigInt h = p;
+    /* BigInt h = p;
     while( h>= p-two){
         h = get_random_big_int(L/8);
     }*/
@@ -92,14 +94,17 @@ void user_key(const BigInt& p, const BigInt& q,const BigInt& g,BigInt& x,BigInt&
 }
 
 void signature(const BigInt& p, const BigInt& q,const BigInt& g,const BigInt& x, const BigInt& coded, BigInt& r,BigInt& s){
-    BigInt k = get_random_lesser(q);
 
 
-   // k = 15;//for test only
-
-
-    r = binpow(g,k,p)%q;
-    s = (rev(k,q)*(coded + x*r))%q;
+    while(true){
+        BigInt k = get_random_lesser(q);
+       // k = 15;//for test only
+        r = binpow(g,k,p)%q;
+        if(r == zero) continue;
+        s = (rev(k,q)*(coded + x*r))%q;
+        if(s == zero) continue;
+        return;
+    }
 }
 
 
@@ -110,12 +115,11 @@ bool verify_signature(const BigInt& p, const BigInt& q,const BigInt& g,const Big
     BigInt v = (binpow(g,u1,p)*binpow(y,u2,p))%p%q;
 
 
-
-    cout << "w = ";w.print();
+    cout << "w  = ";w.print();
     cout << "u1 = ";u1.print();
     cout << "u2 = ";u2.print();
-    cout << "v = ";v.print();
-    cout << "r = ";r.print();
+    cout << "v  = ";v.print();
+    cout << "r  = ";r.print();
     if(v == r){
         return true;
     }
@@ -160,11 +164,12 @@ void test_simple_dsa() { // by https://www.di-mgt.com.au/public-key-crypto-discr
 
 
 int main(){
+
+
     /*test_simple_dsa();
     return 0;*/
-    //BigInt::DEBUG = 1;
-    srand(1);
 
+    srand(1);
 
     string code = "The quick brown fox jumps over the lazy dog";
     string coded_as_str = SHA2::SHA2_main(code);
@@ -176,6 +181,7 @@ int main(){
 
     BigInt p,q,g;
     parametr_generation(p,q,g);
+
     cout << "Chosen prime q: ";q.print(cout,BigInt::PrintType::HEX);
     cout << "Chosen prime p: ";p.print(cout,BigInt::PrintType::HEX);
     cout << "Chosen power g: ";g.print(cout,BigInt::PrintType::HEX);

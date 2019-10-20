@@ -1,7 +1,5 @@
 #include "defines.h"
 #include <iomanip>
-#include "sha_224.h"
-
 #define shr(x,a) (x>>a)
 #define rotr(x,a) ((x>>a) | (x << (32 - a)) )
 #define asbits(x) (std::bitset<8*sizeof(int)>(x))
@@ -29,7 +27,7 @@ const int total_count = 64;
 */
 
 
-static unsigned int
+unsigned int
 h0 = 0xC1059ED8,
 h1 = 0x367CD507,
 h2 = 0x3070DD17,
@@ -74,7 +72,7 @@ void get_word_hash(unsigned int* w){
         h = g;g = f;f = e;e = d + t1;
         d = c;c = b;b = a;a = t1 + t2;
 
-        //cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
+       // cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
 
     }
     h0 = h0 + a;
@@ -108,8 +106,8 @@ string print_res(bool hex/*=false*/){
         //result<< std::hex<< h0 << h1 << h2 << h3 << h4 << h5 << h6;
 
         result << std::hex << std::setfill('0') << std::setw(2)
-             << h0 << " "<< h1 << " "<< h2 << " "<< h3 << " "
-             << h4 << " "<< h5 << " "<< h6 << " "
+             << h0 << ""<< h1 << ""<< h2 << ""<< h3 << ""
+             << h4 << ""<< h5 << ""<< h6 << ""
                 //  << h7  - for 256 only
              << "\n";
         return result.str();
@@ -128,7 +126,7 @@ string print_res(bool hex/*=false*/){
 
 string SHA2_main(string s){
     int coded_size = (s.length() / 4 )  + 1;
-    unsigned int arr[(coded_size/16 + 1)*16];
+    unsigned int arr[(coded_size/16 + 1)*16] = {0};
     for(int i=0;i<(int)s.length();++i){
         if(i%4==0)
             arr[i/4] = 0;
@@ -147,9 +145,9 @@ string SHA2_main(string s){
     unsigned int tmp[64];
     for(int i=0;i<real_size;i+=16){
         memcpy(tmp,arr,16*sizeof(int));
-        //  print_arr(tmp,16,false);
+       // print_arr(tmp,16,true);
         SHA2::get_word_hash(tmp);
-        //   SHA2::print_res(true);
+       // cout << SHA2::print_res(true) << "\n";
 
     }
     return SHA2::print_res(true);
