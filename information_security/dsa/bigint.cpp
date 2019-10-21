@@ -2,7 +2,6 @@
 #include "bigint.h"
 
 void BigInt::init(int size){
-    if(DEBUG)cerr <<"init" << std::endl;
     if(size < 1)
         size = 1;
     values = new Value_type[size];
@@ -12,8 +11,6 @@ void BigInt::init(int size){
 }
 
 BigInt::BigInt(const Value_type val){
-    if(DEBUG)cerr <<"BigInt1 " << val << " " << this << std::endl;
-
     values = nullptr;
     if(val >= mod_part){
         init(start_size);
@@ -29,27 +26,14 @@ BigInt::BigInt(const Value_type val){
 }
 
 BigInt::BigInt(const BigInt& old){
-    if(DEBUG){
-        cerr <<"BigInt2 " << old.len << " "<<old.values_size<< std::endl;
-        cerr << this <<"\n";
-        //cerr << "old : ";old.print(std::cerr,PrintType::HEX,3);
-
-    }
     len = old.len;
     values_size = len;
     values = new Value_type[len];
     if(old.values) // TODO why is this needed
         memcpy(values,old.values,len*sizeof(Value_type));
-
-    if(DEBUG){
-        cerr <<"BigInt2 " << old.len << " "<<old.values_size<< std::endl;
-        cerr <<"BigInt2 " << values << " "<<values+len<< std::endl;
-    }
 }
 
 void BigInt::resize(int new_size){
-    if(DEBUG)cerr <<"resize" << std::endl;
-
     if(new_size < len){
         exit(2);
     }
@@ -73,26 +57,15 @@ void BigInt::update_len(){
 }
 
 void BigInt::upscale(int new_size){
-    if(DEBUG){
-        cerr <<"upscale" << std::endl;
-        cerr <<"old arr" << values << " " << values + values_size << "\n";
-    }
     if(new_size > values_size){
         if(new_size > values_size + values_size)
             resize(new_size);
         else
             resize(values_size+values_size);
     }
-    if(DEBUG){
-        cerr <<"new arr" << values << " " << values + values_size << "\n";
-    }
 }
 
 void BigInt::print(ostream& str/* = cout*/, PrintType type /*= PrintType::DEC*/,int padding/* = 0*/)const{
-    //if(DEBUG)cerr <<"Print" << std::endl;
-
-
-    if(DEBUG)str << "len = " << len << ", arr_size = " << values_size << " ";
 
     if(padding == 0){
         padding = len;
@@ -134,7 +107,6 @@ void BigInt::print(ostream& str/* = cout*/, PrintType type /*= PrintType::DEC*/,
 }
 
 BigInt BigInt::operator+=(const BigInt& a){
-    if(DEBUG)cerr <<"+=" << std::endl;
     int res_len = max(len,a.len) + 1;
     upscale(res_len);
     Value_type cur_sum = 0;
@@ -166,12 +138,6 @@ BigInt BigInt::operator=(const BigInt& old) {
 }
 
 BigInt BigInt::operator*=(const BigInt& a){
-    if(DEBUG){cerr <<"*=" << std::endl;
-
-        cout << "*=\n";
-        print(std::cout,PrintType::HEX,2);
-        a.print(std::cout,PrintType::HEX,2);
-    }
 
     int res_len = len+a.len+2;
     BigInt res = (Value_type)0;
@@ -186,15 +152,7 @@ BigInt BigInt::operator*=(const BigInt& a){
             res.values[i+j] &= (mod_part-1);
         }
     }
-    //res.print(std::cout, PrintType::HEX);std::cout << std::endl;
     res.update_len();
-
-    if(DEBUG){
-        std::cout << std::endl;print(std::cout, PrintType::HEX,2);
-        cout << "*=";
-        a.print(std::cout, PrintType::HEX,2);
-        res.print(std::cout, PrintType::HEX,2);std::cout << std::endl;
-    }
     return *this = res;
 }
 
@@ -250,11 +208,8 @@ bool BigInt::operator>=(const BigInt& a) const{
 }
 
 BigInt BigInt::div2(){
-    if(DEBUG)cerr <<"Div2" << std::endl;
     BigInt res(*this);
     int bit = 0;
-
-
     for(int i=len-1;i>=0;--i){
         res.values[i] |= (bit << type_value_size);
         bit = res.values[i] & 1;
@@ -266,56 +221,22 @@ BigInt BigInt::div2(){
 }
 
 BigInt BigInt::operator/=(const BigInt& a){
-    if(DEBUG){cerr <<"/=" << std::endl;
-        cerr <<"/=" << std::endl;
-        cout << "ww";this->print(std::cout,PrintType::HEX,2);
-        cout << "ww";a.print(std::cout,PrintType::HEX,2);
-    }
-    BigInt l = 0,
+    BigInt l = 1,
             r = *this,
             m;
     BigInt one = BigInt(1);
     while( l + one < r){
         m = (l+r).div2();
 
-        /*
-        l.print(cout, PrintType::HEX,8);
-        m.print(cout, PrintType::HEX,8);
-        r.print(cout, PrintType::HEX,8);
-        a.print(cout, PrintType::HEX,8);
-        (m*a).print(cout, PrintType::HEX,8);
-        print(cout, PrintType::HEX,8);
-        cout <<"\n";
-*/
         if ( m * a <= *this ){
             l = m+one;
         }else{
             r = m;
         }
-        /*
-        l.print(cout, PrintType::HEX,8);
-        m.print(cout, PrintType::HEX,8);
-        r.print(cout, PrintType::HEX,8);
-        a.print(cout, PrintType::HEX,8);
-        (m*a).print(cout, PrintType::HEX,8);
-        print(cout, PrintType::HEX,8);
-        cout <<"\n";
-*/
     }
-    /*
-    l.print(cout, PrintType::HEX,8);
-    a.print(cout, PrintType::HEX,8);
-    (l*a).print(cout, PrintType::HEX,8);
-    this->print(cout, PrintType::HEX,8);
-    cout<<"\n";
-*/
     if( l * a <= *this){
-
-        //cout << "QQ";r.print(std::cout,PrintType::HEX,2);
         return *this = l;
     }
-    //update_len();
-    //cout << "QQ";l.print(std::cout,PrintType::HEX,2);
     return *this = l - BigInt(1);
 }
 
@@ -332,7 +253,6 @@ BigInt BigInt::operator-=(const BigInt& a){
     }
     int minus_one = 0;
     for(int i=0;i< len;++i){
-        // values[i]-=minus_one;
         if(values[i] < a.get_value_at(i) + minus_one){
             values[i] += mod_part-a.get_value_at(i) - minus_one;
             minus_one = 1;
@@ -351,23 +271,6 @@ BigInt BigInt::operator-(const BigInt& a) const {
 }
 
 BigInt BigInt::operator%(const BigInt& a){
-
-    if (  (*this - (*this/a)*a) >= a){
-        cout << "ZZZZZzzzzz\n";
-        this->print(cout,PrintType::HEX);
-        a.print(cout,PrintType::HEX);
-
-        (*this/a).print(cout,PrintType::HEX);
-        (*this/a*a).print(cout,PrintType::HEX);
-        BigInt ll = (*this/a)*a;
-
-        (*this - ll ).print(cout,PrintType::HEX);
-
-        cout << (*this - (*this/a)*a).len << " " << a.len <<"\n";
-
-        cout<<"tt";  (*this - (*this/a)*a).print(cout,PrintType::HEX);
-        cout<<"gg"; a.print(cout,PrintType::HEX);cout<<"\n";}
-
     return *this - (*this/a)*a;
 }
 
@@ -414,24 +317,12 @@ BigInt::BigInt(const string& old,int num_base/* = 10*/){
     BigInt tmp = 0;
     BigInt base =  BigInt(num_base);
     for(int i=0;i<old.length();++i){
-
-        // BigInt v1 = BigInt(num_base);
-        // BigInt v2 = BigInt(char_code(old[i]));
         tmp = tmp * base + BigInt((int)char_code(old[i]));
-        // *this*=v1;
-        // *this+=v2;
     }
     *this = tmp;
 }
 
 BigInt::~BigInt(){
-    if(DEBUG){
-        cerr << "~BigInt\n";
-        cerr << len << " " << values_size << " " << values << " "<< values + 1 << " " <<"\n";
-        if(values)print(std::cerr, PrintType::HEX,3);
-        cerr << std::endl;
-
-    }
     if(values){
         delete values;
         len = 1;
@@ -537,5 +428,91 @@ BigInt binpow_mont(BigInt x,BigInt pow,BigInt mod){
 
 BigInt rev(BigInt x,BigInt mod){
     return binpow(x,mod-BigInt(2),mod);
+}
+
+BigInt get_random_big_int(int bytes){
+    BigInt res = 0;
+    for(int i=0;i<(bytes+ type_value_size/8 - 1)/(type_value_size/8);++i){
+        res = res * BigInt((unsigned int)mod_part) + BigInt((unsigned int)rand()%mod_part);
+    }
+    return res;
+}
+
+bool is_prime(BigInt val){
+
+    for(int i=0;i<10;++i){
+        BigInt a = get_random_big_int(val.get_len());
+        //a.print();
+        if(a >= val || a == BigInt(0)){
+            while(a>=val){
+                a = a.div2();
+            }
+            if( a == BigInt(0)){
+                --i;continue;
+            }
+        }
+        if(! (binpow(a, val - one,val) == one)){
+            return false;
+        }
+    }
+    return true;
+}
+
+BigInt get_random_prime(int bytes){
+    //"203391339108018642348853042914050827989603460621" one of primes found for 80 bit
+    BigInt q = get_random_big_int(bytes);
+    if(q%two == BigInt(0))
+        q += one;
+
+    while(!is_prime(q)){
+        q += two;
+
+    }
+    return q;
+}
+
+BigInt get_random_lesser(const BigInt& x){
+    int bytes = x.get_len();
+    BigInt res(0);
+    do{
+        res = get_random_big_int(bytes);
+    }while(res >= x);
+    return res;
+}
+
+BigInt gcd(BigInt x,BigInt y){
+    while( !(x == zero) && !(y == zero)){
+        x = x%y;
+        if( !(y== zero) ){
+            y = y%x;
+        }
+    }
+    return x+y;
+}
+
+BigInt extended_Euclid(BigInt a,BigInt b,BigInt &x,BigInt &y,BigInt& mod){
+    if( a == zero ){
+        x = zero;
+        y = one;
+        return b;
+    }
+
+    BigInt x1 = 0,
+            y1 = 0;
+
+    BigInt res = extended_Euclid(b%a,a,x1,y1,mod);
+    x = (y1 + mod - ((b/a)*x1)%mod)%mod;
+    y = x1;
+    return res;
+}
+
+BigInt rev_Euclid(BigInt a,BigInt mod){
+    BigInt x,y;
+
+    BigInt z = extended_Euclid(a,mod,x,y,mod);
+    if(!(z == one)){
+        return zero;
+    }
+    return x;
 }
 

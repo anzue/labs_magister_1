@@ -10,6 +10,4 @@
 #include <cstring>
 #include <sstream>
 
-std::stringstream result;
-
 #endif // DEFINES_H

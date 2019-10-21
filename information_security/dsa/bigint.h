@@ -88,5 +88,12 @@ BigInt binpow(BigInt x,BigInt pow,BigInt mod);
 BigInt binpow_mont(BigInt x,BigInt pow,BigInt mod);
 
 BigInt rev(BigInt x,BigInt mod);
+BigInt get_random_big_int(int bytes);
+BigInt get_random_prime(int bytes);
+BigInt get_random_lesser(const BigInt& x);
+BigInt gcd(BigInt x,BigInt y);
+BigInt rev_Euclid(BigInt a,BigInt mod);
+
+bool is_prime(BigInt val);
 
 #endif // NEW_BIG_INT_H

@@ -65,6 +65,9 @@ void get_word_hash(unsigned int* w){
     e = h4;f = h5;g = h6;h = h7;
     unsigned int sig0,ma,sig1,ch,t1,t2;
     for(int i=0;i<total_count;++i){
+
+       cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
+
        sig0 = rotr(a,2) ^ rotr(a,13) ^ rotr(a, 22);
        ma = (a & b) ^ (a & c) ^ (b & c);
        t2 = sig0 + ma;
@@ -74,7 +77,7 @@ void get_word_hash(unsigned int* w){
        h = g;g = f;f = e;e = d + t1;
        d = c;c = b;b = a;a = t1 + t2;
 
-       //cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
+       cout <<std::dec<< a << " " << b << " "<<c << " " <<d << " "<<e <<f << " " <<g << " "<<h<<"\n";
 
     }
     h0 = h0 + a;
@@ -145,9 +148,9 @@ void SHA2_main(string s){
     unsigned int tmp[64];
     for(int i=0;i<real_size;i+=16){
         memcpy(tmp,arr,16*sizeof(int));
-      //  print_arr(tmp,16,false);
+        print_arr(tmp,16,true);
         SHA2::get_word_hash(tmp);
-     //   SHA2::print_res(true);
+      //  SHA2::print_res(true);
 
     }
     SHA2::print_res(true);

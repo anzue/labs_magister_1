@@ -64,5 +64,5 @@ void test_composite(){
 
 
 int main(){
-    test_sha3();
+    test_sha();
 }
