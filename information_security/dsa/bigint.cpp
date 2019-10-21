@@ -42,7 +42,7 @@ void BigInt::resize(int new_size){
     }
     Value_type* new_arr = new Value_type[new_size];
     memcpy(new_arr,values,len*sizeof(Value_type));
-    delete values;
+    delete [] values;
 
     values = new_arr;
     if(len < new_size){
@@ -127,7 +127,7 @@ BigInt BigInt::operator+(const BigInt& a) const{
 
 BigInt BigInt::operator=(const BigInt& old) {
     if(values){
-        delete values;
+        delete [] values;
     }
     len = old.len;
     values_size = len;
@@ -324,7 +324,7 @@ BigInt::BigInt(const string& old,int num_base/* = 10*/){
 
 BigInt::~BigInt(){
     if(values){
-        delete values;
+        delete [] values;
         len = 1;
         values_size = 1;
     }
