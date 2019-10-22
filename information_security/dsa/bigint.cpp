@@ -106,7 +106,7 @@ void BigInt::print(ostream& str/* = cout*/, PrintType type /*= PrintType::DEC*/,
     str<<"\n";
 }
 
-BigInt BigInt::operator+=(const BigInt& a){
+BigInt& BigInt::operator+=(const BigInt& a){
     int res_len = max(len,a.len) + 1;
     upscale(res_len);
     Value_type cur_sum = 0;
@@ -125,19 +125,20 @@ BigInt BigInt::operator+(const BigInt& a) const{
     return res+=a;
 }
 
-BigInt BigInt::operator=(const BigInt& old) {
-    if(values){
-        delete [] values;
-    }
+BigInt& BigInt::operator=(const BigInt& old) {
     len = old.len;
-    values_size = len;
-    values = new Value_type[len];
-    if(old.values)
-        memcpy(values,old.values,len*sizeof(Value_type));
+    if(!values || old.len > values_size){
+        if(values){
+            delete [] values;
+        }
+        values = new Value_type[old.len];
+        values_size = old.len;
+    }
+    memcpy(values,old.values,len*sizeof(Value_type));
     return *this;
 }
 
-BigInt BigInt::operator*=(const BigInt& a){
+BigInt& BigInt::operator*=(const BigInt& a){
 
     int res_len = len+a.len+2;
     BigInt res = (Value_type)0;
@@ -220,7 +221,7 @@ BigInt BigInt::div2(){
     return res;
 }
 
-BigInt BigInt::operator/=(const BigInt& a){
+BigInt& BigInt::operator/=(const BigInt& a){
     BigInt l = 1,
             r = *this,
             m;
@@ -245,11 +246,9 @@ BigInt BigInt::operator/(const BigInt& a) const {
     return res/=a;
 }
 
-BigInt BigInt::operator-=(const BigInt& a){
-    if(DEBUG) cerr <<"-=" << std::endl;
-
+BigInt& BigInt::operator-=(const BigInt& a){
     if(*this <= a){
-        return BigInt(0);
+        return *this = zero;
     }
     int minus_one = 0;
     for(int i=0;i< len;++i){
@@ -280,7 +279,7 @@ bool BigInt::operator==(const Value_type a) const{
 
 
 
-BigInt BigInt::operator=(const string& old){
+BigInt& BigInt::operator=(const string& old){
     *this = 0;
     for(int i=0;i<old.length();++i){
         *this = *this * BigInt(10) + BigInt(old[i] - '0');
@@ -288,7 +287,7 @@ BigInt BigInt::operator=(const string& old){
     return *this;
 }
 
-BigInt BigInt::operator=(const Value_type old){
+BigInt& BigInt::operator=(const Value_type old){
     return *this = BigInt(old);
 }
 
@@ -299,7 +298,7 @@ int char_code(char c){
     if( c>='A'&& c<='F')return c-'A'+10;
     return 0;
 }
-BigInt BigInt::operator+=(const Value_type a){
+BigInt& BigInt::operator+=(const Value_type a){
     upscale(len+1);
     Value_type add = a;
     values[len] = 0;

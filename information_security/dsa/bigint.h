@@ -47,9 +47,9 @@ public:
 
     void print(ostream& str = cout, PrintType type = PrintType::DEC,int padding = 0)const;
 
-    BigInt operator=(const BigInt& old);
-    BigInt operator=(const Value_type old);
-    BigInt operator=(const string& old);
+    BigInt& operator=(const BigInt& old);
+    BigInt& operator=(const Value_type old);
+    BigInt& operator=(const string& old);
 
     bool operator==(const BigInt& a) const;
     bool operator==(const Value_type a) const;
@@ -61,14 +61,14 @@ public:
 
     BigInt div2();
 
-    BigInt operator+=(const Value_type a);
-    BigInt operator+=(const BigInt& a);
+    BigInt& operator+=(const Value_type a);
+    BigInt& operator+=(const BigInt& a);
     BigInt operator+(const BigInt& a) const;
-    BigInt operator*=(const BigInt& a);
+    BigInt& operator*=(const BigInt& a);
     BigInt operator*(const BigInt& a) const;
-    BigInt operator/=(const BigInt& a);
+    BigInt& operator/=(const BigInt& a);
     BigInt operator/(const BigInt& a) const;
-    BigInt operator-=(const BigInt& a);
+    BigInt& operator-=(const BigInt& a);
     BigInt operator-(const BigInt& a) const;
     BigInt operator%(const BigInt& a);
 
