@@ -121,4 +121,14 @@ public:
 
     friend ostream & operator << (ostream &out, const Point &c);
 };
+
+template <size_t len>
+void get_random_bits(bitset<len> &inp){
+    for(int i=0;i <len/8 + 1;++i){
+        inp = (inp << 8) ^ std::bitset<len>(rand()%(1<<8));
+    }
+}
+
+Point generate_point();
+
 #endif // POINT_H

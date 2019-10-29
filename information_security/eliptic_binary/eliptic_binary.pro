@@ -6,8 +6,10 @@ CONFIG -= qt
 SOURCES += \
         BinaryPolynomial.cpp \
         Point.cpp \
+        diffie_hellman.cpp \
         main.cpp
 
 HEADERS += \
     BinaryPolynomial.h \
-    Point.h
+    Point.h \
+    diffie_hellman.h
