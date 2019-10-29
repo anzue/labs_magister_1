@@ -29,72 +29,92 @@ class Point
 {
     U x;
     U y;
-    U z;
 public:
-    bool is_on_curve(){
-
-        return y*y*z + x*y*z == x*x*x + A*x*z*z + B*z*z*z;
+    bool is_on_curve() const{
+        return y*y + x*y == x*x*x + A*x*x + B;
     }
 
-    Point(U tx,U ty,U tz){ x = tx;y = ty;z=tz;}
-    Point(const Point& p) {x = p.x; y = p.y;z=p.z;}
-    Point(){ x = U(0);y = U(0);z = U(0);}
+    Point(U tx,U ty){ x = tx;y = ty;}
+    Point(const Point& p) {x = p.x; y = p.y;}
+    Point(){ x = U(0);y = U(0);}
 
-    Point operator+(Point p)
+    Point add(Point p){
+        U l = (y + p.y) * inv(x+p.x);
+        U x3 = l*l + l + x + p.x + A;
+        U y3 = l*(x + x3) + x3 + y;
+        return Point(x3,y3);
+    }
+
+    Point double_point()
     {
         Point res;
-        /*
-        U l1 = x*p.z;
-        U l2 = p.x*z;
-        U l3 = l1+l2;
-        U l4 = l1*l1;
-        U l5 = l2*l2;
-        U l6 = l4+l5;
-        U l7 = y*p.z*p.z;
-        U l8 = p.y*z*z;
-        U l9 = l7+l8;
-        U l10 = l3*l9;
-        res.z = z*p.z*l6;
-        res.x = l1*(l8+l5)+l2*(l7+l4);
-        res.y = (l1*l10 + l7*l6)*l6 + (l10+res.z)*res.x;*/
-
-        res.x = sqr((y + p.y) * inv(x + p.x)) + (y + p.y)*inv(x+p.x) + x + p.x + A;
-        res.y = ((y + p.y) * inv(x + p.y)) * (x + p.x) + res.x + y;
-        res.z = p.z;
-
+        U m = x + y*inv(x);
+        res.x = m*m + m + A;
+        res.y = x*x + (m + 1)*res.x;
         return res;
     }
 
-    Point Double()
+
+    Point operator+(Point p)
     {
-         Point res;
-         U l1 = x*x;
-         U l2 = l1 + y;
-         U l3 = x*z;
-         res.z = l3*l3;
-         U l5 = l2*res.z;
-         res.x = l2*l2 + l3 + A*res.z;
-         res.y = (res.z + l5)*res.x + l1*l1*res.z;
-         return res;
+        if( !(x == p.x) ){
+            return add(p);
+        }
+        if( y == p.y ){
+            return double_point();
+        }
+        return Point(0,0);
     }
 
+    // multiply by long long val
     Point operator*(long long x)
     {
         Point p = *this;
         Point res = p;
         x = x - 1;
+
         while (x != 0)
         {
             if ((x % 2) != 0)
             {
                 if ((res.x == p.x) || (res.y == p.y))
-                    res = res.Double();
+                    res = res.double_point();
                 else
                     res = res + p;
                 x = x - 1;
             }
             x = x / 2;
-            p = p.Double();
+            p = p.double_point();
+        }
+        return res;
+    }
+
+    // multiply by binary int represented as bitset
+    template<int number_length>
+    Point operator*(std::bitset<number_length> x)
+    {
+        if(x == 0){
+            return Point(0,0);
+        }
+        Point p = *this;
+        Point res = p;
+
+        int pos = 0;
+        do{
+            x.flip(pos);
+        }while(x[pos++] == 1);
+
+        pos = 0;
+        for(;pos < number_length;++pos)
+        {
+            if(x[pos])
+            {
+                if ((res.x == p.x) || (res.y == p.y))
+                    res = res.double_point();
+                else
+                    res = res + p;
+            }
+            p = p.double_point();
         }
         return res;
     }

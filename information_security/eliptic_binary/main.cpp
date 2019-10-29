@@ -2,8 +2,17 @@
 #include "point.h"
 #include "BinaryPolynomial.h"
 #include <time.h>
+#include <assert.h>
 
 using namespace std;
+
+Bits get_random_bits(){
+    Bits res;
+    for(int i=0;i < BinaryPolynomial::n / 8;++i){
+        res = (res << 8) ^ Bits(rand()%(1<<8));
+    }
+    return res;
+}
 
 void test_euclid(){
     BinaryPolynomial x = 65436544;
@@ -33,71 +42,57 @@ void test_reverse(){
     cout << "x * x^-1 = " << x*a;
     cout << "x^-1 * x = " << a*x;
 
-  //  cout << a << x << a + x << a*x;
+    //  cout << a << x << a + x << a*x;
 }
 
 void test_sqrt(){
-     BinaryPolynomial x = 146434120;
-     BinaryPolynomial y = sqrt(x);
+    BinaryPolynomial x = 146434120;
+    BinaryPolynomial y = sqrt(x);
 
-   //  cout << x << " = " << y*y <<"\n";
+    //  cout << x << " = " << y*y <<"\n";
 
+}
+
+void test_mul(){
+    BinaryPolynomial x(get_random_bits()),y(get_random_bits());
+
+
+    cout << "x * y = " << x*y
+         << "y * x = " << y*x;
+    assert(x * y == y*x);
 }
 
 
 Point generate_point_test(){
     // y^2 + y * x + (x^3 + A*x + B) = 0
-    /*
-    BinaryPolynomial z = 1;
-    BinaryPolynomial y = 0;
-    BinaryPolynomial C = x*x*x + A*x+B;
-    int cur_bit;
-    int c_x[] = {0,1,0,1};
-    int c_y[] = {0,0,1,1};
 
-    for(int i=0;i<BinaryPolynomial::n;++i){
-        cur_bit = 0;
-        for(int j=1;j<i;++j){
-            cur_bit ^= (x.bits[j]^y.bits[j])*y.bits[i-j];
-        }
-        bool ok = false;
-        for(int y_cand=0;y_cand<2;++y_cand){
-            if( y_cand)
-        }
+    int k;
+    BinaryPolynomial x,y;
+    do{
+        x = get_random_bits();
+        k = get_square_solution(x,x*x*x+A*x*x+B,y);
+    }while( k <= 0);
 
+    Point res_point = Point(x,y);
 
-    }*/
-    Bits x_bits;
-    srand(time(0));
-    for(int i=0;i < BinaryPolynomial::n / 8;++i){
-        x_bits = (x_bits << 8) ^ Bits(rand()%(1<<8));
-    }
-
-    BinaryPolynomial x(x_bits);
-    BinaryPolynomial z = 1;
-    BinaryPolynomial y = 0;
-    int k = get_square_solution(x,x*x*x+A*x+B,y);
-
-    Point res_point = Point(x,y,z);
+    cout << res_point;
     cout << "res count " << k <<"\n";
-    cout << "On curve " << res_point.is_on_curve() << "\n";
+    cout << "On curve " << res_point.is_on_curve() << "\n\n";
 
-   // cout << res_point;
+    return res_point;
+    // cout << res_point;
 
 }
 
 void test_math(){
-    //test_euclid();return 0;
+    srand(time(0));
     Point p1 = generate_point_test();
     Point p2 = generate_point_test();
     Point p3 = generate_point_test();
-    cout << p1 <<"\n" << p2 <<"\n" << p3 <<"\n";
 
     Point p12 = p1+p2;
     Point p23 = p2+p3;
     Point p13 = p1+p3;
-
-    cout << p12 << "\n" << (p2+p1) <<"\n";
 
     cout << p12 + p3 <<"\n"  <<
             p1 + p23 << "\n" <<
@@ -105,6 +100,19 @@ void test_math(){
 
 }
 
+void test_mul_point1(int v1 = (rand() % 12345),int v2 = rand()%54321){
+    Point a = generate_point_test();
+
+    Point a1 = (a*v1)*v2;
+    Point a2 = (a*v2)*v1;
+    Point a3 = (a*(v1*v2));
+    Point a4 = (a.operator*<1000>(std::bitset<1000>(v1*v2)));
+
+    cout << a1 << a2 << a3 << a4 <<"\n";
+}
+
 int main(){
-    test_math();
+    srand(time(0));
+
+    test_mul_point1();
 }

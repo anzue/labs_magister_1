@@ -231,12 +231,11 @@ int get_square_solution(BinaryPolynomial u, BinaryPolynomial w, BinaryPolynomial
     }
     BinaryPolynomial half_tra = half_trace(v);
 
-
-    std::cout << u << w << v  << tra << half_tra;
+    //std::cout << u << w << v  << tra << half_tra;
 
     y = half_tra*u;
 
-    std::cout << y*y + y*u + w;
+    //std::cout << y*y + y*u + w;
 
     return 2;
 }
