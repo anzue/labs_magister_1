@@ -10,6 +10,8 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.textinput import TextInput
 from kivy.graphics import Color, Rectangle
 
+from flask import get_flask_translation
+
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
