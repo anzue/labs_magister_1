@@ -2,7 +2,7 @@ import json
 
 import requests
 
-ngrok_port = 'http://0c8adda8.ngrok.io:80'
+ngrok_port = 'http://0c2377d6.ngrok.io:80'
 ip_port_local = "http://127.0.0.1:5000/translate/"
 ip_port = "http://217.66.98.149:5000/translate"
 
