@@ -10,15 +10,16 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.textinput import TextInput
 from kivy.graphics import Color, Rectangle
 
-from flask import get_flask_translation
+from flask import get_flask_translation, get_history
 
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-
+        self.session_id = 0
         self.lang_from = 'English'
         self.lang_to = 'English'
+        self.history_position = 0
 
         def on_enter(instance, value):
             print('User pressed enter in', instance)
@@ -46,7 +47,7 @@ class MainScreen(Screen):
             #    text_size= (self.width, self.height)
         )
 
-        with self.canvas.before:
+        with label.canvas.before:
             Color(1, 1, 1, 1)
             Rectangle(pos=label.pos, size=label.size)
 
@@ -56,16 +57,44 @@ class MainScreen(Screen):
 
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.2))
 
-        button_translate = Button(text='Request translation', font_size=14)
+        def shift_hist_position(instance, shift):
+            self.history_position += shift
+            if self.history_position < 0:
+                self.history_position = 0
+            if self.history_position > 100:
+                self.history_position = 100
+            res = get_history(self.history_position, self.session_id)
+            print(res)
+            if res['result'] != 'OK':
+                return
+            self.textinput.text = res['input']
+            self.recoginzed.text = res['translation']
+            print(self.history_position)
 
-        def callback(instance):
+        def translate(instance):
             print('The button <%s> is being pressed' % instance.text)
             self.recoginzed.text = "Waiting for translation"
-            self.recoginzed.text = get_flask_translation(self.textinput.text)
+            self.recoginzed.text = get_flask_translation(self.textinput.text, session_id=self.session_id)
 
-        button_translate.bind(on_press=callback)
+        def clear_text(instance):
+            self.recoginzed.text = "";
+            self.textinput.text = ""
+
+        button_prev = Button(text='Previous', font_size=14)
+        button_prev.bind(on_press=lambda x: shift_hist_position(x, 1))
+        button_layout.add_widget(button_prev)
+
+        button_next = Button(text='Next', font_size=14)
+        button_next.bind(on_press=lambda x: shift_hist_position(x, -1))
+        button_layout.add_widget(button_next)
+
+        button_translate = Button(text='Request translation', font_size=14)
+        button_translate.bind(on_press=translate)
         button_layout.add_widget(button_translate)
 
+        button_clear = Button(text='Clear', font_size=14)
+        button_clear.bind(on_press=clear_text)
+        button_layout.add_widget(button_clear)
         # languages = BoxLayout(orientation='horizontal')
         # lang_from = BoxLayout()
         # lang_to = BoxLayout()
@@ -90,8 +119,8 @@ class MainScreen(Screen):
 
         total_layout = BoxLayout(orientation='vertical')
         #  total_layout.add_widget(languages)
-        total_layout.add_widget(layout)
         total_layout.add_widget(button_layout)
+        total_layout.add_widget(layout)
 
         self.textinput = textinput
         self.recoginzed = label

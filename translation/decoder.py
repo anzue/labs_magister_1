@@ -1,7 +1,6 @@
 from imports import *
 import data
 
-
 class Attention(tf.keras.layers.Layer):
     def __init__(self, units):
         super(Attention, self).__init__()

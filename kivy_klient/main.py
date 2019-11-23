@@ -14,8 +14,9 @@ class MyApp(App):
 
         self.main_screen = MainScreen(name="main screen")
 
-        def move_to_main():
+        def move_to_main(session_id = 0):
             self.sm.switch_to(self.main_screen)
+            self.main_screen.session_id = session_id
 
         self.login_screen = LoginScreen(switch_main_callback=move_to_main, name="Login screen")
 

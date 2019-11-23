@@ -25,8 +25,11 @@ class Model:
                                          decoder=self.decoder)
         self.checkpoint = checkpoint
 
-    def load(self):
-        self.checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_dir))
+    def load(self, name=None):
+        if name:
+            self.checkpoint.restore(name)
+        else:
+            self.checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_dir))
 
     def train(self, epochs=1):
 
@@ -38,7 +41,7 @@ class Model:
         decoder = self.decoder
         optimizer = self.optimizer
 
-        targ_lang = self.inp_tokenizer
+        out_lang = self.inp_tokenizer
 
         def loss_function(real, pred):
             loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
@@ -49,18 +52,18 @@ class Model:
             return tf.reduce_mean(loss_)
 
         @tf.function
-        def train_step(inp, targ, enc_hidden):
+        def train_step(inp, out, enc_hidden):
             loss = 0
             with tf.GradientTape() as tape:
                 enc_output, enc_hidden = encoder(inp, enc_hidden)
                 dec_hidden = enc_hidden
-                dec_input = tf.expand_dims([targ_lang.word_index[data.BEG_TOKEN]] * data.batch_size, 1)
-                for t in range(1, targ.shape[1]):
-                    predictions, dec_hidden, _ = decoder(dec_input, dec_hidden, enc_output)
-                    loss += loss_function(targ[:, t], predictions)
-                    dec_input = tf.expand_dims(targ[:, t], 1)
+                dec_inp = tf.expand_dims([out_lang.word_index[data.BEG_TOKEN]] * data.batch_size, 1)
+                for t in range(1, out.shape[1]):
+                    predictions, dec_hidden, _ = decoder(dec_inp, dec_hidden, enc_output)
+                    loss += loss_function(out[:, t], predictions)
+                    dec_inp = tf.expand_dims(out[:, t], 1)
 
-            batch_loss = (loss / int(targ.shape[1]))
+            batch_loss = (loss / int(out.shape[1]))
             variables = encoder.trainable_variables + decoder.trainable_variables
             gradients = tape.gradient(loss, variables)
             optimizer.apply_gradients(zip(gradients, variables))
@@ -70,19 +73,19 @@ class Model:
             run_time = time.time()
             enc_hidden = encoder.initialize_hidden_state()
             total_loss = 0
-            for (batch, (inp, targ)) in enumerate(self.dataset.take(data.steps_per_epoch)):
-                loss = train_step(inp, targ, enc_hidden)
+            for (batch, (inp, out)) in enumerate(self.dataset.take(data.steps_per_epoch)):
+                loss = train_step(inp, out, enc_hidden)
                 total_loss += loss
             print('for epoch {}  loss is {:.3f} time = {:.3f}'.format(epoch, total_loss.numpy() / data.steps_per_epoch,
                                                                       time.time() - run_time))
 
-            if epoch % 50 == 0:
-                self.checkpoint.save(file_prefix=self.checkpoint_prefix + "_" + epoch)
+            if epoch % 20 == 0:
+                self.checkpoint.save(file_prefix=self.checkpoint_prefix + "_" + str(epoch))
 
             if epoch % 10 == 0:
                 validation_loss = 0
-                for (batch, (inp, targ)) in enumerate(self.dataset_validation.take(data.steps_per_epoch)):
-                    loss = train_step(inp, targ, enc_hidden)
+                for (batch, (inp, out)) in enumerate(self.dataset_validation.take(data.steps_per_epoch)):
+                    loss = train_step(inp, out, enc_hidden)
                     validation_loss += loss
 
                 print("for epoch {} validation loss is {:.3f}".format(epoch,
@@ -94,33 +97,33 @@ class Model:
     def test(self, sentence):
         print("Translating - ", sentence)
         inp_lang = self.inp_tokenizer
-        targ_lang = self.out_tokenizer
+        out_lang = self.out_tokenizer
         sentence = preprocess_sentence(sentence)
         sentence_cleared = " ".join(i for i in sentence.split(' ') if i in inp_lang.word_index)
-        inputs = [inp_lang.word_index[i] for i in sentence_cleared.split(' ')]
-        # print(inputs)
-        inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
+        inps = [inp_lang.word_index[i] for i in sentence_cleared.split(' ')]
+        # print(inps)
+        inps = tf.keras.preprocessing.sequence.pad_sequences([inps],
                                                                maxlen=data.max_length_inp, padding='post')
-        inputs = tf.convert_to_tensor(inputs)
+        inps = tf.convert_to_tensor(inps)
         result = ''
         hidden = [tf.zeros((1, data.units))]
-        enc_out, enc_hidden = self.encoder(inputs, hidden)
+        enc_out, enc_hidden = self.encoder(inps, hidden)
 
         dec_hidden = enc_hidden
-        dec_input = tf.expand_dims([targ_lang.word_index[data.BEG_TOKEN]], 0)
+        dec_inp = tf.expand_dims([out_lang.word_index[data.BEG_TOKEN]], 0)
 
-        for t in range(data.max_length_targ):
+        for t in range(data.max_length_out):
             predictions, dec_hidden, attention_weights = \
-                self.decoder(dec_input, dec_hidden, enc_out)
+                self.decoder(dec_inp, dec_hidden, enc_out)
 
             predicted_id = tf.argmax(predictions[0]).numpy()
-            result += targ_lang.index_word[predicted_id] + ' '
+            result += out_lang.index_word[predicted_id] + ' '
 
-            if targ_lang.index_word[predicted_id] == data.END_TOKEN:
+            if out_lang.index_word[predicted_id] == data.END_TOKEN:
                 print("Translated  - ", result[:-5])
                 return result[:-5], sentence
 
-            dec_input = tf.expand_dims([predicted_id], 0)
+            dec_inp = tf.expand_dims([predicted_id], 0)
 
         print("Translated  - ", result)
 
