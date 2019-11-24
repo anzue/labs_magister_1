@@ -75,6 +75,7 @@ class MainScreen(Screen):
             print('The button <%s> is being pressed' % instance.text)
             self.recoginzed.text = "Waiting for translation"
             self.recoginzed.text = get_flask_translation(self.textinput.text, session_id=self.session_id)
+            self.history_position = 0
 
         def clear_text(instance):
             self.recoginzed.text = "";
