@@ -14,8 +14,8 @@ void test_rsa(){
     cout << std::endl;
 
 
-    int p_len = 14*16;
-    int q_len = 14*16;
+    int p_len = 10*16;
+    int q_len = 10*16;
 
     srand(1);
 
@@ -61,9 +61,9 @@ void test_rsa(){
 
     BigInt c = binpow(m,e,n);
 
-    cout <<"c =      ";c.print(cout,BigInt::PrintType::HEX);
+    cout <<"c =       ";c.print(cout,BigInt::PrintType::HEX);
 
     BigInt decoded_m = binpow(c,d,n);
 
-    cout << "decoded ";decoded_m.print(cout,BigInt::PrintType::HEX);
+    cout << "decoded  ";decoded_m.print(cout,BigInt::PrintType::HEX);
 }

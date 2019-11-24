@@ -34,5 +34,3 @@ HEADERS += \
     sha/sha_224.h \
     sha/sha_3_512.h
 
-SUBDIRS += \
-    dsa/dsa.pro

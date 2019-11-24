@@ -38,9 +38,6 @@ def load_data(path, max_size):  # http://www.manythings.org/anki/
         word_pairs = [[preprocess_sentence(w) for w in l.split('\t')[:2]] for l in lines]
         return zip(*word_pairs)
 
-    def max_length(tensor):
-        return max(len(t) for t in tensor)
-
     def tokenize(lang):
         lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
         lang_tokenizer.fit_on_texts(lang)
@@ -62,7 +59,7 @@ def load_data(path, max_size):  # http://www.manythings.org/anki/
     global buffer_size, batch_size, steps_per_epoch, embedding_dim, units, vocab_inp_size, vocab_tar_size, max_length_out, max_length_inp
 
     inp_tensor, out_tensor, inp_lang, out_lang = load_dataset(path, max_size)
-    max_length_out, max_length_inp = max_length(out_tensor), max_length(inp_tensor)
+    max_length_out, max_length_inp = max(len(x) for x in out_tensor), max(len(x) for x in inp_tensor)
     inp_tensor_train, inp_tensor_val, out_tensor_train, out_tensor_val = \
         train_test_split(inp_tensor, out_tensor, test_size=0.1)
 
@@ -74,7 +71,3 @@ def load_data(path, max_size):  # http://www.manythings.org/anki/
     return (tensors_to_tfDataset(inp_tensor_train, out_tensor_train),
             tensors_to_tfDataset(inp_tensor_val, out_tensor_val),
             inp_lang, out_lang)
-
-
-if __name__ == '__main__':
-    load_data("zzz")

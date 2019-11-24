@@ -5,11 +5,13 @@ CONFIG -= qt
 
 SOURCES += \
         bigint.cpp \
+        dsa.cpp \
         main.cpp \
+        rsa.cpp \
         sha_224.cpp
 
 HEADERS += \
     bigint.h \
     defines.h \
-    sha_224.h \
-    defines.h
+    defines.h \
+    sha_224.h

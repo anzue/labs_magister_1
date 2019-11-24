@@ -65,6 +65,8 @@ def read_transform_data(path: str):
 
 
 if __name__ == "__main__":
+
+    
     x_train, x_test, y_train, y_test = read_transform_data("mushrooms.csv")
 
     model = create_model(x_train.shape[0], 1)
@@ -86,5 +88,7 @@ if __name__ == "__main__":
     print(model.predict(x_train[:1]), y_train[0])
 
     #print(list(zip(model.predict(x_test),y_test)))
+
+
 
 

@@ -75,9 +75,7 @@ def get_invertable(low, up):
     res = None
     while not found:
         try:
-            # if True:
             res = np.random.randint(low, up + 1, size=Polynom.N)
-
             Polynom.CUR_MOD = p
             inv1 = invert_mine(Polynom(res))
             Polynom.CUR_MOD = q

@@ -82,7 +82,7 @@ def login():
 
 def run_server():
     global translation_model
-    max_size = 70000
+    max_size = 50000
     translation_model = prepeare_model("data/eng-deu.txt", max_size)
     # translation_model = Model('data/eng-deu.txt', max_size)
     translation_model.load()

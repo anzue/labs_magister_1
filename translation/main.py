@@ -9,8 +9,8 @@ def prepeare_model(path, max_size):
 
 
 if __name__ == '__main__':
-    max_size = 70000
-    model = prepeare_model("data/eng-deu.txt", max_size)
-    model.train(200)
+    max_size = 50000
+    model = prepeare_model("data/eng-fra.txt", max_size)
+    model.train(100)
     res, _ = model.test(u'Habe ich recht?')
     print(res)
